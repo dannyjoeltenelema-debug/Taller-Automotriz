@@ -8,8 +8,7 @@ Route::middleware('guest')->group(function () {
     Volt::route('login', 'auth.login')
         ->name('login');
 
-    Volt::route('register', 'auth.register')
-        ->name('register');
+    // Registro público deshabilitado: las cuentas las crea el administrador.
 
     Volt::route('forgot-password', 'auth.forgot-password')
         ->name('password.request');

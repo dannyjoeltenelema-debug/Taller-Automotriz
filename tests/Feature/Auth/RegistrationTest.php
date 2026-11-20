@@ -3,33 +3,36 @@
 namespace Tests\Feature\Auth;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Livewire\Volt\Volt;
+use Illuminate\Support\Facades\Route;
 use Tests\TestCase;
 
+/**
+ * El registro público está deshabilitado: las cuentas las crea el administrador.
+ */
 class RegistrationTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_registration_screen_can_be_rendered(): void
+    public function test_registration_route_does_not_exist(): void
     {
-        $response = $this->get('/register');
+        $this->assertFalse(Route::has('register'));
 
-        $response->assertStatus(200);
+        $this->get('/register')->assertNotFound();
+        $this->post('/register', [
+            'name' => 'Test User',
+            'email' => 'test@example.com',
+            'password' => 'password',
+            'password_confirmation' => 'password',
+        ])->assertNotFound();
+
+        $this->assertGuest();
     }
 
-    public function test_new_users_can_register(): void
+    public function test_login_screen_has_no_sign_up_link(): void
     {
-        $response = Volt::test('auth.register')
-            ->set('name', 'Test User')
-            ->set('email', 'test@example.com')
-            ->set('password', 'password')
-            ->set('password_confirmation', 'password')
-            ->call('register');
-
-        $response
-            ->assertHasNoErrors()
-            ->assertRedirect(route('dashboard', absolute: false));
-
-        $this->assertAuthenticated();
+        $this->get('/login')
+            ->assertOk()
+            ->assertDontSee('Sign up')
+            ->assertDontSee('/register');
     }
 }
