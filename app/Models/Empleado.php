@@ -1,0 +1,54 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
+class Empleado extends Model
+{
+    public const CARGOS = [
+        'admin' => 'Administrador',
+        'asesor' => 'Asesor de servicio',
+        'tecnico' => 'Técnico',
+        'mecanico' => 'Mecánico',
+    ];
+
+    protected $fillable = [
+        'sede_id', 'user_id', 'nombres', 'apellidos', 'cedula', 'telefono', 'cargo', 'especialidad', 'activo',
+    ];
+
+    protected $casts = ['activo' => 'boolean'];
+
+    public function sede(): BelongsTo
+    {
+        return $this->belongsTo(Sede::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function ordenesAsesor(): HasMany
+    {
+        return $this->hasMany(OrdenTrabajo::class, 'asesor_id');
+    }
+
+    public function ordenesTecnico(): HasMany
+    {
+        return $this->hasMany(OrdenTrabajo::class, 'tecnico_id');
+    }
+
+    public function scopeTecnicosActivos(Builder $q): Builder
+    {
+        return $q->where('cargo', 'tecnico')->where('activo', true);
+    }
+
+    public function getNombreCompletoAttribute(): string
+    {
+        return trim($this->nombres.' '.$this->apellidos);
+    }
+}

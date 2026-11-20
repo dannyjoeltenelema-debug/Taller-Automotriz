@@ -73,7 +73,9 @@ new #[Layout('components.layouts.auth')] class extends Component {
 }; ?>
 
 <div class="flex flex-col gap-6">
-    <x-auth-header title="Log in to your account" description="Enter your email and password below to log in" />
+    <a href="{{ route('home') }}" class="text-sm text-zinc-600 dark:text-zinc-400 hover:underline" wire:navigate>← Volver al inicio</a>
+
+    <x-auth-header title="Acceso personal" description="Ingrese su correo y contraseña para acceder al panel del taller" />
 
     <!-- Session Status -->
     <x-auth-session-status class="text-center" :status="session('status')" />

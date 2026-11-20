@@ -12,16 +12,15 @@ class DashboardTest extends TestCase
 
     public function test_guests_are_redirected_to_the_login_page(): void
     {
-        $response = $this->get('/dashboard');
-        $response->assertRedirect('/login');
+        $this->get('/panel/ordenes')->assertRedirect('/login');
     }
 
-    public function test_authenticated_users_can_visit_the_dashboard(): void
+    public function test_dashboard_redirects_to_work_orders_panel(): void
     {
-        $user = User::factory()->create();
-        $this->actingAs($user);
+        $this->seed();
+        $this->actingAs(User::where('email', 'admin@taller.ec')->first());
 
-        $response = $this->get('/dashboard');
-        $response->assertStatus(200);
+        $this->get(route('dashboard'))->assertRedirect('/panel/ordenes');
+        $this->get('/panel/ordenes')->assertOk();
     }
 }
