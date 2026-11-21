@@ -55,7 +55,8 @@ class RendimientoConsultasTest extends TestCase
     private function consultas(callable $fn): array
     {
         if (! $this->escuchando) {
-            DB::listen(fn ($q) => $this->sql[] = $q->sql);
+            // Identificadores normalizados a comillas dobles: mismas aserciones en SQLite y MySQL.
+            DB::listen(fn ($q) => $this->sql[] = str_replace('`', '"', $q->sql));
             $this->escuchando = true;
         }
         Once::flush();
