@@ -2,11 +2,11 @@
 
 namespace App\Providers;
 
+use App\Listeners\AuditarAcceso;
 use App\Models\OrdenTrabajo;
 use App\Models\Vehiculo;
 use App\Observers\OrdenTrabajoObserver;
 use App\Observers\VehiculoObserver;
-use App\Listeners\AuditarAcceso;
 use App\Support\Catalogos;
 use Illuminate\Auth\Events\Failed;
 use Illuminate\Auth\Events\Login;

@@ -20,9 +20,6 @@ class Auditoria extends Component
 {
     use SoloSuperadmin, WithPagination;
 
-    /** Tope de filas del PDF (dompdf arma todo en memoria). */
-    public const MAX_PDF = 1000;
-
     #[Url(except: '')]
     public string $usuario = '';
 
@@ -85,7 +82,7 @@ class Auditoria extends Component
     {
         $filtros = $this->filtros();
         $registros = Registro::query()->filtrar($filtros)->with('user:id,name,cedula')
-            ->latest('id')->limit(self::MAX_PDF)->get();
+            ->latest('id')->limit(config('taller.auditoria.max_filas_pdf'))->get();
 
         Registro::registrar('exportado', null, null, ['tipo' => 'auditoria_pdf', 'filas' => $registros->count()] + array_filter($filtros));
 
@@ -94,7 +91,7 @@ class Auditoria extends Component
             'filtros' => $filtros,
             'usuarios' => $this->usuarios->keyBy('id'),
             'empresa' => Empresa::actual(),
-            'tope' => self::MAX_PDF,
+            'tope' => config('taller.auditoria.max_filas_pdf'),
         ])->setPaper('a4', 'landscape');
 
         return response()->streamDownload(fn () => print ($pdf->output()), 'auditoria-'.now()->format('Ymd-His').'.pdf');

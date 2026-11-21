@@ -6,6 +6,8 @@ use App\Models\OrdenTrabajo;
 use App\Models\User;
 use App\Models\Vehiculo;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Request;
+use Illuminate\Routing\Middleware\ThrottleRequests;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Once;
@@ -31,7 +33,7 @@ class MedicionPantallasTest extends TestCase
     {
         $this->seed();
         // Se mide el render, no el limitador del portal (30 peticiones/min por IP).
-        $this->withoutMiddleware(\Illuminate\Routing\Middleware\ThrottleRequests::class);
+        $this->withoutMiddleware(ThrottleRequests::class);
         $admin = User::where('cedula', '1710000009')->first();
         $super = User::where('cedula', '1729057412')->first();
         $veh = Vehiculo::where('placa', 'PBA4521')->first();
@@ -132,7 +134,7 @@ class MedicionPantallasTest extends TestCase
     private function existeRuta(string $url): bool
     {
         try {
-            Route::getRoutes()->match(\Illuminate\Http\Request::create($url));
+            Route::getRoutes()->match(Request::create($url));
 
             return true;
         } catch (\Throwable) {

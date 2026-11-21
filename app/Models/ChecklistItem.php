@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Model;
 class ChecklistItem extends Model
 {
     use Auditable;
-
     use InvalidaCatalogos;
 
     protected $fillable = ['nombre', 'activo', 'orden'];

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\BloquearUsuarioInhabilitado;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -22,7 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         // Un usuario bloqueado desde Sistema > Usuarios pierde la sesión en su siguiente petición.
-        $middleware->web(append: [\App\Http\Middleware\BloquearUsuarioInhabilitado::class]);
+        $middleware->web(append: [BloquearUsuarioInhabilitado::class]);
 
         // Usuarios ya autenticados que visitan /login van al panel.
         $middleware->redirectUsersTo(fn () => route('ordenes.index'));

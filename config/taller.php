@@ -79,6 +79,11 @@ return [
         'reabrir_a' => 'en_proceso',
     ],
 
+    'auditoria' => [
+        // Tope de filas al exportar a PDF (dompdf arma el documento en memoria).
+        'max_filas_pdf' => (int) env('TALLER_AUDITORIA_MAX_PDF', 1000),
+    ],
+
     'cache' => [
         // Red de seguridad: los catálogos se invalidan al guardar/eliminar, pero
         // además expiran tras este tiempo (cubre updates masivos sin eventos).
