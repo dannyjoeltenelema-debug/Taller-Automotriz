@@ -9,7 +9,7 @@
             <h1 class="page-title"><span class="placa">{{ $v->placa_formateada }}</span> · {{ $descripcion }}</h1>
         </div>
         @if ($whatsapp)
-            <a href="{{ $whatsapp }}" target="_blank" rel="noopener" class="btn" style="border-color:#15803D;color:#15803D">Escribir por WhatsApp</a>
+            <a href="{{ $whatsapp }}" target="_blank" rel="noopener" class="btn btn-whatsapp">Escribir por WhatsApp</a>
         @endif
     </div>
 
@@ -69,7 +69,7 @@
                 </x-campo>
                 <x-campo label="Franja horaria" :req="true" error="hora_inicio">
                     <select class="inp" wire:model="hora_inicio">
-                        @foreach (Cita::franjas() as $f)<option value="{{ $f }}">{{ Cita::etiquetaFranja($f) }}</option>@endforeach
+                        @foreach (Cita::franjas() as $f)<option value="{{ $f }}" wire:key="opt-{{ $f }}">{{ Cita::etiquetaFranja($f) }}</option>@endforeach
                     </select>
                 </x-campo>
                 @if ($sedes->count() > 1)
@@ -79,7 +79,7 @@
                 @endif
                 <x-campo label="Servicio / motivo" :req="true" error="motivo" class="sm:col-span-2">
                     <input class="inp" list="dl-servicios" wire:model="motivo" placeholder="Ej. Cambio de aceite">
-                    <datalist id="dl-servicios">@foreach ($servicios as $s)<option value="{{ $s }}">@endforeach</datalist>
+                    <datalist id="dl-servicios">@foreach ($servicios as $s)<option value="{{ $s }}" wire:key="opt-{{ $s }}">@endforeach</datalist>
                 </x-campo>
                 <x-campo label="Su nombre" :req="true" error="cliente_nombre"><input class="inp" wire:model="cliente_nombre" autocomplete="name"></x-campo>
                 <x-campo label="Teléfono de contacto" :req="true" error="cliente_telefono"><input class="inp" wire:model="cliente_telefono" inputmode="tel" autocomplete="tel" placeholder="09XXXXXXXX"></x-campo>

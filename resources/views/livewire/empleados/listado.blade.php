@@ -14,7 +14,7 @@
         <div class="panel-head">
             <select class="inp w-auto" wire:model.live="filtroCargo">
                 <option value="">Todos los cargos</option>
-                @foreach (Empleado::CARGOS as $k => $v)<option value="{{ $k }}">{{ $v }}</option>@endforeach
+                @foreach (Empleado::CARGOS as $k => $v)<option value="{{ $k }}" wire:key="opt-{{ $k }}">{{ $v }}</option>@endforeach
             </select>
         </div>
         <div class="tbl-wrap">
@@ -50,7 +50,7 @@
                     <x-campo label="Cédula" :req="true" error="form.cedula"><input class="inp" wire:model="form.cedula" maxlength="10" inputmode="numeric"></x-campo>
                     <x-campo label="Teléfono" error="form.telefono"><input class="inp" wire:model="form.telefono"></x-campo>
                     <x-campo label="Cargo" :req="true" error="form.cargo">
-                        <select class="inp" wire:model.live="form.cargo">@foreach (Empleado::CARGOS as $k => $v)<option value="{{ $k }}">{{ $v }}</option>@endforeach</select>
+                        <select class="inp" wire:model.live="form.cargo">@foreach (Empleado::CARGOS as $k => $v)<option value="{{ $k }}" wire:key="opt-{{ $k }}">{{ $v }}</option>@endforeach</select>
                     </x-campo>
                     <x-campo label="Sede" :req="true" error="form.sede_id">
                         <select class="inp" wire:model="form.sede_id">@foreach ($sedes as $s)<option value="{{ $s->id }}" wire:key="sede-{{ $s->id }}">{{ $s->nombre }}</option>@endforeach</select>
@@ -84,8 +84,9 @@
                     @endif
                 </div>
                 <div class="modal-foot">
+                    <span class="muted text-[12px] mr-auto" wire:dirty>Cambios sin guardar</span>
                     <button type="button" class="btn" wire:click="$set('modal', false)">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Guardar</button>
+                    <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="guardar"><span wire:loading.remove wire:target="guardar">Guardar</span><span wire:loading wire:target="guardar">Guardando…</span></button>
                 </div>
             </form>
         </div>

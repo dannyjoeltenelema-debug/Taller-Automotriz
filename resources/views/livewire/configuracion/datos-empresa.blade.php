@@ -14,6 +14,6 @@
             <div class="form-row"><label class="lbl">Correo</label><div><input class="inp" wire:model="form.email">@error('form.email')<div class="err">{{ $message }}</div>@enderror</div></div>
             <div class="form-row"><label class="lbl">Dirección</label><div><input class="inp" wire:model="form.direccion"></div></div>
         </div>
-        <div class="modal-foot"><button class="btn btn-primary">Guardar</button></div>
+        <div class="modal-foot"><span class="muted text-[12px] mr-auto" wire:dirty>Cambios sin guardar</span><button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="guardar"><span wire:loading.remove wire:target="guardar">Guardar</span><span wire:loading wire:target="guardar">Guardando…</span></button></div>
     </form>
 </div>

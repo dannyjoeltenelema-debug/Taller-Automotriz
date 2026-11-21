@@ -54,7 +54,7 @@
                     <x-campo label="Documento" :req="true" error="numero_documento">
                         <div class="flex gap-1">
                             <select class="inp w-28" wire:model.live="tipo_documento">
-                                @foreach (\App\Models\Cliente::TIPOS_DOCUMENTO as $k => $v)<option value="{{ $k }}">{{ $v }}</option>@endforeach
+                                @foreach (\App\Models\Cliente::TIPOS_DOCUMENTO as $k => $v)<option value="{{ $k }}" wire:key="opt-{{ $k }}">{{ $v }}</option>@endforeach
                             </select>
                             <input class="inp" wire:model="numero_documento" inputmode="numeric">
                         </div>
@@ -72,8 +72,9 @@
                     </x-campo>
                 </div>
                 <div class="modal-foot">
+                    <span class="muted text-[12px] mr-auto" wire:dirty>Cambios sin guardar</span>
                     <button type="button" class="btn" wire:click="$set('modal', false)">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Guardar</button>
+                    <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="guardar"><span wire:loading.remove wire:target="guardar">Guardar</span><span wire:loading wire:target="guardar">Guardando…</span></button>
                 </div>
             </form>
         </div>

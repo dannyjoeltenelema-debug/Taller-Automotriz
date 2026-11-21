@@ -86,7 +86,7 @@
                 <div class="panel-body space-y-3">
                     <x-campo label="Marca (existente o nueva)" :req="true" error="m_marca">
                         <input class="inp" list="dl-cat-marcas" wire:model="m_marca">
-                        <datalist id="dl-cat-marcas">@foreach ($marcas as $m)<option value="{{ $m->nombre }}">@endforeach</datalist>
+                        <datalist id="dl-cat-marcas">@foreach ($marcas as $m)<option value="{{ $m->nombre }}" wire:key="opt-{{ $m->nombre }}">@endforeach</datalist>
                     </x-campo>
                     <x-campo label="Modelo" :req="true" error="m_modelo"><input class="inp" wire:model="m_modelo"></x-campo>
                     <div class="flex justify-end"><button class="btn btn-primary">Agregar</button></div>

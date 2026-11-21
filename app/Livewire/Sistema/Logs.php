@@ -4,6 +4,7 @@ namespace App\Livewire\Sistema;
 
 use App\Support\LectorLog;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Lazy;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -11,9 +12,15 @@ use Livewire\Component;
 /** Visor de storage/logs: solo lectura, paginado desde el final, filtro por nivel. */
 #[Layout('components.layouts.panel')]
 #[Title('Logs del sistema')]
+#[Lazy]
 class Logs extends Component
 {
     use SoloSuperadmin;
+
+    public function placeholder()
+    {
+        return view('livewire.sistema.partials.cargando', ['titulo' => 'Logs del sistema']);
+    }
 
     #[Url(except: '')]
     public string $archivo = '';

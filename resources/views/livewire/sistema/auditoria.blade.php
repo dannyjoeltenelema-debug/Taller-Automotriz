@@ -41,8 +41,8 @@
                 <thead><tr><th>Fecha</th><th>Usuario</th><th>Acción</th><th>Módulo</th><th>Registro</th><th>IP</th><th>Cambios</th></tr></thead>
                 <tbody>
                 @forelse ($registros as $r)
-                    @php $diff = $r->diff(); @endphp
-                    <tr wire:key="aud-{{ $r->id }}" x-data="{ abierto: false }">
+                    @php $diff = $r->diff(); $abierto = $detalleId === $r->id; @endphp
+                    <tr wire:key="aud-{{ $r->id }}">
                         <td class="whitespace-nowrap">{{ $r->created_at->format('d/m/Y H:i:s') }}</td>
                         <td>{{ $r->user?->name ?? '—' }} @if ($r->user)<span class="muted">({{ $r->user->cedula }})</span>@endif</td>
                         <td><span @class(['badge', 'st-cancelado' => in_array($r->accion, ['eliminado', 'login_fallido', 'bloqueado']), 'st-recibido' => ! in_array($r->accion, ['eliminado', 'login_fallido', 'bloqueado'])])>{{ $r->accion_label }}</span></td>
@@ -51,9 +51,11 @@
                         <td class="whitespace-nowrap">{{ $r->ip ?? '—' }}</td>
                         <td>
                             @if ($diff)
-                                <button type="button" class="link text-[12.5px]" @click="abierto = !abierto"
-                                        x-text="abierto ? 'Ocultar' : 'Ver {{ count($diff) }} {{ count($diff) === 1 ? 'campo' : 'campos' }}'">Ver {{ count($diff) }} {{ count($diff) === 1 ? 'campo' : 'campos' }}</button>
-                                <div x-show="abierto" x-cloak x-transition:enter="anim-enter" x-transition:enter-start="anim-from-up" x-transition:leave="anim-leave" x-transition:leave-end="anim-oculto" class="mt-1">
+                                <button type="button" class="link text-[12.5px]" wire:click="verDetalle({{ $r->id }})" wire:loading.attr="disabled" wire:target="verDetalle({{ $r->id }})">
+                                    {{ $abierto ? 'Ocultar' : 'Ver '.count($diff).' '.(count($diff) === 1 ? 'campo' : 'campos') }}
+                                </button>
+                                @if ($abierto)
+                                <div class="mt-1 anim-aparece-arriba" wire:key="aud-det-{{ $r->id }}">
                                     <table class="text-[12px] w-full">
                                         <thead><tr class="muted"><td class="pr-3">Campo</td><td class="pr-3">Antes</td><td>Después</td></tr></thead>
                                         <tbody>
@@ -67,6 +69,7 @@
                                         </tbody>
                                     </table>
                                 </div>
+                                @endif
                             @else
                                 <span class="muted">—</span>
                             @endif

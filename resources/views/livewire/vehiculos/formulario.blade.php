@@ -33,28 +33,29 @@
             <x-campo label="Placa" :req="true" error="placa"><input class="inp placa uppercase" wire:model="placa" placeholder="PBA-4521"></x-campo>
             <x-campo label="Marca" :req="true" error="marca">
                 <input class="inp" list="dl-marcas" wire:model.live.debounce.400ms="marca" autocomplete="off">
-                <datalist id="dl-marcas">@foreach ($marcas as $m)<option value="{{ $m }}">@endforeach</datalist>
+                <datalist id="dl-marcas">@foreach ($marcas as $m)<option value="{{ $m }}" wire:key="opt-{{ $m }}">@endforeach</datalist>
             </x-campo>
             <x-campo label="Modelo" :req="true" error="modelo">
                 <input class="inp" list="dl-modelos" wire:model="modelo" autocomplete="off">
-                <datalist id="dl-modelos">@foreach ($this->modelosSugeridos as $m)<option value="{{ $m }}">@endforeach</datalist>
+                <datalist id="dl-modelos">@foreach ($this->modelosSugeridos as $m)<option value="{{ $m }}" wire:key="opt-{{ $m }}">@endforeach</datalist>
             </x-campo>
             <x-campo label="Año" :req="true" error="anio"><input type="number" class="inp" wire:model="anio"></x-campo>
             <x-campo label="Color" :req="true" error="color"><input class="inp" wire:model="color"></x-campo>
             <x-campo label="Combustible" error="tipo_combustible">
-                <select class="inp" wire:model="tipo_combustible">@foreach (\App\Models\Vehiculo::COMBUSTIBLES as $k => $v)<option value="{{ $k }}">{{ $v }}</option>@endforeach</select>
+                <select class="inp" wire:model="tipo_combustible">@foreach (\App\Models\Vehiculo::COMBUSTIBLES as $k => $v)<option value="{{ $k }}" wire:key="opt-{{ $k }}">{{ $v }}</option>@endforeach</select>
             </x-campo>
             <x-campo label="VIN / Chasis" error="vin"><input class="inp uppercase" wire:model="vin" maxlength="17"></x-campo>
             <x-campo label="N.º de motor" error="numero_motor"><input class="inp uppercase" wire:model="numero_motor"></x-campo>
             <x-campo label="Transmisión" error="transmision">
-                <select class="inp" wire:model="transmision">@foreach (\App\Models\Vehiculo::TRANSMISIONES as $k => $v)<option value="{{ $k }}">{{ $v }}</option>@endforeach</select>
+                <select class="inp" wire:model="transmision">@foreach (\App\Models\Vehiculo::TRANSMISIONES as $k => $v)<option value="{{ $k }}" wire:key="opt-{{ $k }}">{{ $v }}</option>@endforeach</select>
             </x-campo>
             <x-campo label="Intervalo de mantenimiento (km)" error="intervalo_mantenimiento_km"><input type="number" class="inp" wire:model="intervalo_mantenimiento_km"></x-campo>
             <label class="flex items-center gap-2 mt-5"><input type="checkbox" wire:model="activo"> Vehículo activo</label>
         </div>
         <div class="modal-foot">
+            <span class="muted text-[12px] mr-auto" wire:dirty>Cambios sin guardar</span>
             <a href="{{ $vehiculo ? route('vehiculos.show', $vehiculo) : route('vehiculos.index') }}" wire:navigate class="btn">Cancelar</a>
-            <button type="submit" class="btn btn-primary">Guardar</button>
+            <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="guardar"><span wire:loading.remove wire:target="guardar">Guardar</span><span wire:loading wire:target="guardar">Guardando…</span></button>
         </div>
     </form>
 </div>

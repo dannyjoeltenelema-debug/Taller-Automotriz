@@ -249,7 +249,7 @@ class RendimientoConsultasTest extends TestCase
         // Request nuevo (memo limpio): la caché compartida ya no tiene la versión vieja.
         $this->consultas(fn () => null);
         $this->assertTrue(Catalogos::marcas()->contains('Geely'));
-        $this->actingAs($this->admin())->get('/panel/vehiculos/nuevo')->assertSee('<option value="Geely">', false);
+        $this->actingAs($this->admin())->get('/panel/vehiculos/nuevo')->assertSee('<option value="Geely"', false);
     }
 
     // ───────────── Parámetros en config/taller.php ─────────────

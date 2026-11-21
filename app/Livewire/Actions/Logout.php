@@ -17,6 +17,11 @@ class Logout
         Session::invalidate();
         Session::regenerateToken();
 
+        // Desde el panel se llama con fetch (Alpine) y luego navega con wire:navigate: no hace falta redirigir.
+        if (request()->expectsJson()) {
+            return response()->noContent();
+        }
+
         return redirect('/');
     }
 }

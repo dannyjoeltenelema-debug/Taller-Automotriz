@@ -22,7 +22,7 @@
                 <select wire:model.live="estado" class="inp w-auto">
                     <option value="activas">Activas (no entregadas)</option>
                     @foreach (\App\Models\OrdenTrabajo::ESTADOS as $k => $v)
-                        <option value="{{ $k }}">{{ $v }}</option>
+                        <option value="{{ $k }}" wire:key="opt-{{ $k }}">{{ $v }}</option>
                     @endforeach
                     <option value="todas">Todas</option>
                 </select>

@@ -3,19 +3,24 @@
  | Sin degradados, sin sombras exageradas. Un único acento azul acero.
  */
 :root {
-    --c-bg: #F4F5F7;
-    --c-surface: #FFFFFF;
-    --c-border: #D1D5DB;
-    --c-border-soft: #E5E7EB;
-    --c-text: #1F2937;
-    --c-muted: #6B7280;
-    --c-accent: #1E40AF;
-    --c-accent-hover: #1E3A8A;
-    --c-accent-soft: #EEF2FB;
-    --c-danger: #B91C1C;
-    --c-row-hover: #F9FAFB;
+    /* Alias cortos de la paleta definida en el @theme de app.css (no repetir hex aquí). */
+    --c-bg: var(--color-erp-fondo);
+    --c-surface: var(--color-erp-superficie);
+    --c-border: var(--color-erp-borde);
+    --c-border-soft: var(--color-erp-borde-suave);
+    --c-text: var(--color-erp-texto);
+    --c-muted: var(--color-erp-tenue);
+    --c-accent: var(--color-erp-acento);
+    --c-accent-hover: var(--color-erp-acento-hover);
+    --c-accent-soft: var(--color-erp-acento-suave);
+    --c-danger: var(--color-erp-peligro);
+    --c-row-hover: var(--color-erp-fila-hover);
+    /* Única excepción a la paleta: verde de marca de WhatsApp (tono oscuro, legible sobre blanco). */
+    --c-whatsapp: #15803D;
     --font-ui: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
 }
+
+[x-cloak] { display: none !important; }
 
 @layer components {
     .ui { font-family: var(--font-ui); background: var(--c-bg); color: var(--c-text); font-size: 13.5px; line-height: 1.45; }
@@ -28,12 +33,14 @@
     .nav-link:hover { background: var(--c-row-hover); }
     .nav-link.active { border-left-color: var(--c-accent); background: var(--c-accent-soft); color: var(--c-accent); font-weight: 600; }
     .nav-link.disabled { color: #9CA3AF; cursor: not-allowed; }
+    /* Con el indicador deslizante, el borde del activo lo dibuja .nav-indicador. */
+    .con-indicador .nav-link.active { border-left-color: transparent; }
 
     .page-title { font-size: 18px; font-weight: 600; }
     .page-sub { color: var(--c-muted); font-size: 12.5px; }
 
     .panel { background: var(--c-surface); border: 1px solid var(--c-border); border-radius: 3px; }
-    .panel-head { padding: 8px 12px; border-bottom: 1px solid var(--c-border); font-weight: 600; display: flex; align-items: center; justify-content: space-between; gap: 8px; background: #FAFAFB; }
+    .panel-head { padding: 8px 12px; border-bottom: 1px solid var(--c-border); font-weight: 600; display: flex; align-items: center; justify-content: space-between; gap: 8px; background: var(--color-erp-fondo-suave); }
     .panel-body { padding: 12px; }
 
     /* KPIs */
@@ -72,6 +79,7 @@
     .btn-primary { background: var(--c-accent); border-color: var(--c-accent); color: #fff; }
     .btn-primary:hover { background: var(--c-accent-hover); }
     .btn-danger { color: var(--c-danger); }
+    .btn-whatsapp { border-color: var(--c-whatsapp); color: var(--c-whatsapp); }
     .btn-sm { height: 25px; padding: 2px 8px; font-size: 12px; }
     .btn:disabled { opacity: .55; cursor: not-allowed; }
     .link { color: var(--c-accent); }
@@ -100,8 +108,8 @@
     /* Modal */
     .modal-back { position: fixed; inset: 0; background: rgba(17, 24, 39, .45); z-index: 40; display: flex; align-items: flex-start; justify-content: center; padding: 40px 12px; overflow-y: auto; }
     .modal { background: #fff; border: 1px solid var(--c-border); border-radius: 3px; width: 100%; max-width: 720px; }
-    .modal-head { padding: 9px 14px; border-bottom: 1px solid var(--c-border); font-weight: 600; display: flex; justify-content: space-between; background: #FAFAFB; }
-    .modal-foot { padding: 9px 14px; border-top: 1px solid var(--c-border); display: flex; justify-content: flex-end; gap: 8px; background: #FAFAFB; }
+    .modal-head { padding: 9px 14px; border-bottom: 1px solid var(--c-border); font-weight: 600; display: flex; justify-content: space-between; background: var(--color-erp-fondo-suave); }
+    .modal-foot { padding: 9px 14px; border-top: 1px solid var(--c-border); display: flex; justify-content: flex-end; gap: 8px; background: var(--color-erp-fondo-suave); }
 
     /* Dropdown de resultados */
     .dropdown { position: absolute; z-index: 30; left: 0; right: 0; top: 100%; background: #fff; border: 1px solid var(--c-border); border-top: 0; max-height: 260px; overflow-y: auto; }
@@ -120,5 +128,6 @@
 
 @media print {
     .no-print { display: none !important; }
+    main { margin-left: 0 !important; padding-top: 0 !important; }
     body { background: #fff !important; }
 }

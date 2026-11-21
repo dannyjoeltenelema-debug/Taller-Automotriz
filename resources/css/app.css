@@ -25,8 +25,24 @@
     --color-zinc-900: #171717;
     --color-zinc-950: #0a0a0a;
 
-    --color-accent: var(--color-neutral-800);
-    --color-accent-content: var(--color-neutral-800);
+    /* Paleta ERP: única fuente de los hex. Genera utilidades (bg-erp-fondo, text-erp-acento, border-erp-borde…)
+       y panel.css las usa vía var(--color-erp-*). */
+    --color-erp-fondo: #F4F5F7;
+    --color-erp-fondo-suave: #FAFAFB;
+    --color-erp-superficie: #FFFFFF;
+    --color-erp-borde: #D1D5DB;
+    --color-erp-borde-suave: #E5E7EB;
+    --color-erp-texto: #1F2937;
+    --color-erp-tenue: #6B7280;
+    --color-erp-acento: #1E40AF;
+    --color-erp-acento-hover: #1E3A8A;
+    --color-erp-acento-suave: #EEF2FB;
+    --color-erp-peligro: #B91C1C;
+    --color-erp-fila-hover: #F9FAFB;
+
+    /* Acento de Flux (pantallas de Mi perfil): el mismo azul del panel, no el neutral-800 del starter. */
+    --color-accent: var(--color-erp-acento);
+    --color-accent-content: var(--color-erp-acento);
     --color-accent-foreground: var(--color-white);
 }
 

@@ -41,6 +41,14 @@ class Auditoria extends Component
     #[Url(as: 'q', except: '')]
     public string $buscar = '';
 
+    /** Registro cuyo diff está abierto (se renderiza solo ese: la página no carga 50 tablas de cambios). */
+    public ?int $detalleId = null;
+
+    public function verDetalle(int $id): void
+    {
+        $this->detalleId = $this->detalleId === $id ? null : $id;
+    }
+
     public function updated(string $prop): void
     {
         if (in_array($prop, ['usuario', 'modulo', 'accion', 'desde', 'hasta', 'buscar'], true)) {

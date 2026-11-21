@@ -44,6 +44,7 @@
                     <x-campo label="Teléfono" error="telefono"><input class="inp" wire:model="telefono"></x-campo>
                 </div>
                 <div class="modal-foot">
+                    <span class="muted text-[12px] mr-auto" wire:dirty>Cambios sin guardar</span>
                     <button type="button" class="btn" wire:click="$set('modal', false)">Cancelar</button>
                     <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="guardar">
                         <span wire:loading.remove wire:target="guardar">Guardar</span><span wire:loading wire:target="guardar">Guardando…</span>

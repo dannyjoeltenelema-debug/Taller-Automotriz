@@ -36,7 +36,7 @@
                                 <div class="break-all">{{ $e['mensaje'] }}</div>
                                 @if (trim($e['detalle']) !== '')
                                     <button type="button" class="link text-[12px]" @click="abierto = !abierto" x-text="abierto ? 'Ocultar detalle' : 'Ver detalle'">Ver detalle</button>
-                                    <pre x-show="abierto" x-cloak x-transition:enter="anim-enter" x-transition:enter-start="anim-from-up" class="mt-1 text-[11px] whitespace-pre-wrap break-all bg-[#F9FAFB] border border-[var(--c-border-soft)] p-2 max-h-72 overflow-auto">{{ $e['detalle'] }}</pre>
+                                    <pre x-show="abierto" x-cloak x-transition:enter="anim-enter" x-transition:enter-start="anim-from-up" class="mt-1 text-[11px] whitespace-pre-wrap break-all bg-[var(--c-row-hover)] border border-[var(--c-border-soft)] p-2 max-h-72 overflow-auto">{{ $e['detalle'] }}</pre>
                                 @endif
                             </td>
                         </tr>

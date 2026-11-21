@@ -72,8 +72,11 @@ class SistemaTest extends TestCase
         $c = EmpresaColaboradora::firstOrFail();
         $c->update(['contacto' => 'Contacto auditado']);
 
+        $id = Registro::where('accion', 'actualizado')->where('auditable_type', EmpresaColaboradora::class)->latest('id')->value('id');
+
         Livewire::actingAs($this->super())->test(Auditoria::class)
-            ->assertSee('Contacto auditado')
+            ->assertDontSee('Contacto auditado') // el diff se carga al pedirlo
+            ->call('verDetalle', $id)->assertSee('Contacto auditado')
             ->set('usuario', (string) $this->admin()->id)->assertSee('Contacto auditado')
             ->set('usuario', (string) $this->super()->id)->assertDontSee('Contacto auditado')
             ->set('usuario', '')->set('modulo', EmpresaColaboradora::class)->set('accion', 'actualizado')->assertSee('Contacto auditado')
@@ -196,7 +199,7 @@ class SistemaTest extends TestCase
         file_put_contents($ruta, implode("\n", $lineas)."\n");
 
         try {
-            Livewire::actingAs($this->super())->test(Logs::class, ['archivo' => 'test-visor.log'])
+            Livewire::actingAs($this->super())->withoutLazyLoading()->test(Logs::class)
                 ->set('archivo', 'test-visor.log')
                 ->assertSee('Mensaje número 130')->assertDontSee('Mensaje número 30<') // página 1 = 100 más recientes (130…31)
                 ->call('irA', 2)->assertSee('Mensaje número 30')->assertDontSee('Mensaje número 31')

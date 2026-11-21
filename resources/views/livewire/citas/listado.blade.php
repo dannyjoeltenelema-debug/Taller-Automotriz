@@ -15,7 +15,7 @@
             <div class="flex flex-wrap gap-2 items-center">
                 <select class="inp w-auto" wire:model.live="estado">
                     <option value="abiertas">Pendientes y confirmadas</option>
-                    @foreach (Cita::ESTADOS as $k => $v)<option value="{{ $k }}">{{ $v }}</option>@endforeach
+                    @foreach (Cita::ESTADOS as $k => $v)<option value="{{ $k }}" wire:key="opt-{{ $k }}">{{ $v }}</option>@endforeach
                     <option value="todas">Todas</option>
                 </select>
                 <input type="date" class="inp w-auto" wire:model.live="fecha" title="Filtrar por fecha deseada">
@@ -73,14 +73,15 @@
                     <x-campo label="Teléfono" :req="true" error="form.cliente_telefono"><input class="inp" wire:model="form.cliente_telefono"></x-campo>
                     <x-campo label="Fecha deseada" :req="true" error="form.fecha_deseada"><input type="date" class="inp" wire:model="form.fecha_deseada" min="{{ now()->toDateString() }}"></x-campo>
                     <x-campo label="Franja horaria" :req="true" error="form.hora_inicio">
-                        <select class="inp" wire:model="form.hora_inicio">@foreach (Cita::franjas() as $f)<option value="{{ $f }}">{{ Cita::etiquetaFranja($f) }}</option>@endforeach</select>
+                        <select class="inp" wire:model="form.hora_inicio">@foreach (Cita::franjas() as $f)<option value="{{ $f }}" wire:key="opt-{{ $f }}">{{ Cita::etiquetaFranja($f) }}</option>@endforeach</select>
                     </x-campo>
                     <x-campo label="Motivo / servicio" :req="true" error="form.motivo" class="sm:col-span-2"><input class="inp" wire:model="form.motivo"></x-campo>
                     <x-campo label="Observación" error="form.observacion" class="sm:col-span-2"><textarea class="inp" rows="2" wire:model="form.observacion"></textarea></x-campo>
                 </div>
                 <div class="modal-foot">
+                    <span class="muted text-[12px] mr-auto" wire:dirty>Cambios sin guardar</span>
                     <button type="button" class="btn" wire:click="$set('modal', false)">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Registrar cita</button>
+                    <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="guardar"><span wire:loading.remove wire:target="guardar">Registrar cita</span><span wire:loading wire:target="guardar">Guardando…</span></button>
                 </div>
             </form>
         </div>

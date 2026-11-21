@@ -19,11 +19,12 @@
             </h1>
             @if ($cita_id)<div class="page-sub">Convirtiendo la cita #{{ $cita_id }} en orden de trabajo.</div>@endif
         </div>
-        <div class="flex gap-2">
+        <div class="flex gap-2 items-center">
+            <span class="muted text-[12px]" wire:dirty>Cambios sin guardar</span>
             @if ($orden)
                 <a href="{{ route('ordenes.pdf', $orden) }}" target="_blank" class="btn">Imprimir OT (PDF)</a>
             @endif
-            <button type="button" wire:click="guardar" wire:loading.attr="disabled" class="btn btn-primary">
+            <button type="button" wire:click="guardar" wire:loading.attr="disabled" wire:target="guardar" class="btn btn-primary">
                 <span wire:loading.remove wire:target="guardar">Guardar orden</span>
                 <span wire:loading wire:target="guardar">Guardando…</span>
             </button>
@@ -66,7 +67,7 @@
                             @error('cliente_id') <div class="err">{{ $message }}</div> @enderror
                         </div>
                     @else
-                        <div class="flex flex-wrap justify-between gap-2 border border-[var(--c-border)] rounded-[3px] p-2 bg-[#FAFAFB]">
+                        <div class="flex flex-wrap justify-between gap-2 border border-[var(--c-border)] rounded-[3px] p-2 bg-erp-fondo-suave">
                             <div>
                                 <div class="font-semibold">{{ $cli->nombres }}</div>
                                 <div class="muted text-[12.5px]">
@@ -112,7 +113,7 @@
                     </x-campo>
                     <x-campo label="Nivel de combustible" error="nivel_combustible">
                         <select class="inp" wire:model="nivel_combustible">
-                            @foreach (OrdenTrabajo::NIVELES_COMBUSTIBLE as $k => $v) <option value="{{ $k }}">{{ $v }}</option> @endforeach
+                            @foreach (OrdenTrabajo::NIVELES_COMBUSTIBLE as $k => $v) <option value="{{ $k }}" wire:key="opt-{{ $k }}">{{ $v }}</option> @endforeach
                         </select>
                     </x-campo>
                     <x-campo label="Kilometraje de ingreso" :req="true" error="kilometraje_ingreso">
@@ -279,7 +280,7 @@
                     <x-campo label="Forma de cobro" error="forma_cobro">
                         <select class="inp" wire:model="forma_cobro" @disabled($estado_cobro !== 'pagado')>
                             <option value="">—</option>
-                            @foreach (OrdenTrabajo::FORMAS_COBRO as $k => $v) <option value="{{ $k }}">{{ $v }}</option> @endforeach
+                            @foreach (OrdenTrabajo::FORMAS_COBRO as $k => $v) <option value="{{ $k }}" wire:key="opt-{{ $k }}">{{ $v }}</option> @endforeach
                         </select>
                     </x-campo>
                 </div>
@@ -321,7 +322,7 @@
                                 <x-campo label="Documento" :req="true" error="nuevo.numero_documento">
                                     <div class="flex gap-1">
                                         <select class="inp w-28" wire:model.live="nuevo.tipo_documento">
-                                            @foreach (\App\Models\Cliente::TIPOS_DOCUMENTO as $k => $v) <option value="{{ $k }}">{{ $v }}</option> @endforeach
+                                            @foreach (\App\Models\Cliente::TIPOS_DOCUMENTO as $k => $v) <option value="{{ $k }}" wire:key="opt-{{ $k }}">{{ $v }}</option> @endforeach
                                         </select>
                                         <input class="inp" wire:model="nuevo.numero_documento" inputmode="numeric"
                                                placeholder="{{ $nuevo['tipo_documento'] === 'ruc' ? '13 dígitos' : ($nuevo['tipo_documento'] === 'cedula' ? '10 dígitos' : '') }}">
@@ -355,11 +356,11 @@
                             </x-campo>
                             <x-campo label="Marca" :req="true" error="nuevo.marca">
                                 <input class="inp" list="dl-marcas" wire:model.live.debounce.400ms="nuevo.marca" autocomplete="off">
-                                <datalist id="dl-marcas">@foreach ($marcas as $m)<option value="{{ $m }}">@endforeach</datalist>
+                                <datalist id="dl-marcas">@foreach ($marcas as $m)<option value="{{ $m }}" wire:key="opt-{{ $m }}">@endforeach</datalist>
                             </x-campo>
                             <x-campo label="Modelo" :req="true" error="nuevo.modelo">
                                 <input class="inp" list="dl-modelos" wire:model="nuevo.modelo" autocomplete="off">
-                                <datalist id="dl-modelos">@foreach ($this->modelosSugeridos as $m)<option value="{{ $m }}">@endforeach</datalist>
+                                <datalist id="dl-modelos">@foreach ($this->modelosSugeridos as $m)<option value="{{ $m }}" wire:key="opt-{{ $m }}">@endforeach</datalist>
                             </x-campo>
                             <x-campo label="Año" :req="true" error="nuevo.anio">
                                 <input type="number" class="inp" wire:model="nuevo.anio" min="1950" max="{{ date('Y') + 1 }}">
@@ -369,7 +370,7 @@
                             </x-campo>
                             <x-campo label="Tipo de combustible" error="nuevo.tipo_combustible">
                                 <select class="inp" wire:model="nuevo.tipo_combustible">
-                                    @foreach (Vehiculo::COMBUSTIBLES as $k => $v) <option value="{{ $k }}">{{ $v }}</option> @endforeach
+                                    @foreach (Vehiculo::COMBUSTIBLES as $k => $v) <option value="{{ $k }}" wire:key="opt-{{ $k }}">{{ $v }}</option> @endforeach
                                 </select>
                             </x-campo>
                         </div>
@@ -377,8 +378,9 @@
                     </fieldset>
                 </div>
                 <div class="modal-foot">
+                    <span class="muted text-[12px] mr-auto" wire:dirty>Cambios sin guardar</span>
                     <button type="button" class="btn" wire:click="$set('modalAlta', false)">Cancelar</button>
-                    <button type="submit" class="btn btn-primary" wire:loading.attr="disabled">Registrar y seleccionar</button>
+                    <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="guardarAlta"><span wire:loading.remove wire:target="guardarAlta">Registrar y seleccionar</span><span wire:loading wire:target="guardarAlta">Guardando…</span></button>
                 </div>
             </form>
         </div>
