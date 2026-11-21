@@ -16,7 +16,7 @@ new class extends Component {
     public function mount(): void
     {
         $this->name = Auth::user()->name;
-        $this->email = Auth::user()->email;
+        $this->email = (string) Auth::user()->email;
     }
 
     /**
@@ -30,7 +30,7 @@ new class extends Component {
             'name' => ['required', 'string', 'max:255'],
 
             'email' => [
-                'required',
+                'nullable',
                 'string',
                 'lowercase',
                 'email',
@@ -39,6 +39,7 @@ new class extends Component {
             ],
         ]);
 
+        $validated['email'] = $validated['email'] ?: null;
         $user->fill($validated);
 
         if ($user->isDirty('email')) {
@@ -77,7 +78,7 @@ new class extends Component {
             <flux:input wire:model="name" label="{{ __('Name') }}" type="text" name="name" required autofocus autocomplete="name" />
 
             <div>
-                <flux:input wire:model="email" label="{{ __('Email') }}" type="email" name="email" required autocomplete="email" />
+                <flux:input wire:model="email" label="{{ __('Email') }}" type="email" name="email" autocomplete="email" />
 
                 @if (auth()->user() instanceof \Illuminate\Contracts\Auth\MustVerifyEmail &&! auth()->user()->hasVerifiedEmail())
                     <div>

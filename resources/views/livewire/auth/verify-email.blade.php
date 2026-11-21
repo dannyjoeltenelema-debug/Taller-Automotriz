@@ -34,28 +34,16 @@ new #[Layout('components.layouts.auth')] class extends Component {
     }
 }; ?>
 
-<div class="mt-4 flex flex-col gap-6">
-    <div class="text-center text-sm text-gray-600">
-        {{ __('Please verify your email address by clicking on the link we just emailed to you.') }}
-    </div>
+<div class="flex flex-col gap-4">
+    <x-auth-header title="Verificar correo" description="Revise su bandeja de entrada y abra el enlace de verificación que le enviamos." />
 
     @if (session('status') == 'verification-link-sent')
-        <div class="font-medium text-center text-sm text-green-600">
-            {{ __('A new verification link has been sent to the email address you provided during registration.') }}
-        </div>
+        <div class="alert alert-ok">Se envió un nuevo enlace de verificación a su correo.</div>
     @endif
 
-    <div class="flex flex-col items-center justify-between space-y-3">
-        <flux:button wire:click="sendVerification" variant="primary" class="w-full">
-            {{ __('Resend verification email') }}
-        </flux:button>
+    <button type="button" wire:click="sendVerification" class="btn btn-primary">Reenviar correo de verificación</button>
 
-        <button
-            wire:click="logout"
-            type="submit"
-            class="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-        >
-            {{ __('Log out') }}
-        </button>
+    <div class="text-center">
+        <button type="button" wire:click="logout" class="link text-[12.5px]">Cerrar sesión</button>
     </div>
 </div>

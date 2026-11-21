@@ -3,7 +3,7 @@
     'description',
 ])
 
-<div class="flex w-full flex-col gap-2 text-center">
-    <h1 class="text-xl font-medium dark:text-zinc-200">{{ $title }}</h1>
-    <p class="text-center text-sm dark:text-zinc-400">{{ $description }}</p>
+<div class="flex w-full flex-col gap-1 text-center">
+    <h1 class="page-title">{{ $title }}</h1>
+    <p class="page-sub">{{ $description }}</p>
 </div>

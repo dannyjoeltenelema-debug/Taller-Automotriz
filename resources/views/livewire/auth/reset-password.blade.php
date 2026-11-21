@@ -68,50 +68,28 @@ new #[Layout('components.layouts.auth')] class extends Component {
     }
 }; ?>
 
-<div class="flex flex-col gap-6">
-    <x-auth-header title="Reset password" description="Please enter your new password below" />
+<div class="flex flex-col gap-4">
+    <x-auth-header title="Restablecer contraseña" description="Ingrese su nueva contraseña" />
 
-    <!-- Session Status -->
-    <x-auth-session-status class="text-center" :status="session('status')" />
+    <x-auth-session-status :status="session('status')" />
 
-    <form wire:submit="resetPassword" class="flex flex-col gap-6">
-        <!-- Email Address -->
-        <div class="grid gap-2">
-            <flux:input wire:model="email" id="email" label="{{ __('Email') }}" type="email" name="email" required autocomplete="email" />
-        </div>
+    <form wire:submit="resetPassword" class="flex flex-col gap-3" novalidate>
+        <x-campo label="Correo electrónico" for="email" error="email">
+            <input id="email" type="email" class="inp" wire:model="email" name="email" autocomplete="email" required>
+        </x-campo>
 
-        <!-- Password -->
-        <div class="grid gap-2">
-            <flux:input
-                wire:model="password"
-                id="password"
-                label="{{ __('Password') }}"
-                type="password"
-                name="password"
-                required
-                autocomplete="new-password"
-                placeholder="Password"
-            />
-        </div>
+        <x-campo label="Nueva contraseña" for="password" error="password">
+            <input id="password" type="password" class="inp" wire:model="password" name="password" autocomplete="new-password" required>
+        </x-campo>
 
-        <!-- Confirm Password -->
-        <div class="grid gap-2">
-            <flux:input
-                wire:model="password_confirmation"
-                id="password_confirmation"
-                label="{{ __('Confirm password') }}"
-                type="password"
-                name="password_confirmation"
-                required
-                autocomplete="new-password"
-                placeholder="Confirm password"
-            />
-        </div>
+        <x-campo label="Confirmar contraseña" for="password_confirmation" error="password_confirmation">
+            <input id="password_confirmation" type="password" class="inp" wire:model="password_confirmation" name="password_confirmation" autocomplete="new-password" required>
+        </x-campo>
 
-        <div class="flex items-center justify-end">
-            <flux:button type="submit" variant="primary" class="w-full">
-                {{ __('Reset password') }}
-            </flux:button>
-        </div>
+        <button type="submit" class="btn btn-primary mt-1">Restablecer contraseña</button>
     </form>
+
+    <div class="text-center">
+        <a href="{{ route('login') }}" class="link text-[12.5px]" wire:navigate>← Volver al acceso</a>
+    </div>
 </div>

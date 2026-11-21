@@ -30,25 +30,33 @@ class OrganizacionSeeder extends Seeder
             'telefono' => '022654321', 'horario' => 'Lun–Vie 08:00–17:00',
         ]);
 
-        // Usuarios con empleado vinculado
-        $super = User::create([
-            'name' => 'Diego Salazar', 'email' => 'superadmin@taller.ec',
-            'password' => Hash::make('password'), 'email_verified_at' => now(),
-        ]);
-        $super->assignRole('superadmin');
-        Empleado::create([
-            'sede_id' => $norte->id, 'user_id' => $super->id, 'nombres' => 'Diego', 'apellidos' => 'Salazar Mena',
-            'cedula' => '1712345675', 'telefono' => '0991112233', 'cargo' => 'admin',
-        ]);
+        // Login por cédula (campo "Usuario").
+        // ⚠ Contraseña = cédula SOLO para desarrollo: en producción cambiarlas por contraseñas fuertes.
+        foreach ([
+            ['Super Administrador 1', '1729057412'],
+            ['Super Administrador 2', '1721708608'],
+        ] as [$nombre, $cedula]) {
+            User::create([
+                'name' => $nombre, 'cedula' => $cedula, 'email' => null,
+                'password' => Hash::make($cedula),
+            ])->assignRole('superadmin');
+        }
 
+        // Admin de prueba, vinculado a su empleado (misma cédula).
         $admin = User::create([
-            'name' => 'María Fernanda López', 'email' => 'admin@taller.ec',
-            'password' => Hash::make('password'), 'email_verified_at' => now(),
+            'name' => 'María Fernanda López', 'cedula' => '1710000009', 'email' => 'admin@taller.ec',
+            'password' => Hash::make('1710000009'), 'email_verified_at' => now(),
         ]);
         $admin->assignRole('admin');
         Empleado::create([
             'sede_id' => $norte->id, 'user_id' => $admin->id, 'nombres' => 'María Fernanda', 'apellidos' => 'López Cevallos',
-            'cedula' => '1709876542', 'telefono' => '0992223344', 'cargo' => 'asesor',
+            'cedula' => '1710000009', 'telefono' => '0992223344', 'cargo' => 'asesor',
+        ]);
+
+        // Empleado administrativo sin usuario propio
+        Empleado::create([
+            'sede_id' => $norte->id, 'nombres' => 'Diego', 'apellidos' => 'Salazar Mena',
+            'cedula' => '1712345675', 'telefono' => '0991112233', 'cargo' => 'admin',
         ]);
 
         // Técnicos SIN usuario

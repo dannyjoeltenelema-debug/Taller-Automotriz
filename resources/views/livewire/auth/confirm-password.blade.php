@@ -18,11 +18,11 @@ new #[Layout('components.layouts.auth')] class extends Component {
         ]);
 
         if (! Auth::guard('web')->validate([
-            'email' => Auth::user()->email,
+            'cedula' => Auth::user()->cedula,
             'password' => $this->password,
         ])) {
             throw ValidationException::withMessages([
-                'password' => __('auth.password'),
+                'password' => 'La contraseña es incorrecta.',
             ]);
         }
 
@@ -32,30 +32,16 @@ new #[Layout('components.layouts.auth')] class extends Component {
     }
 }; ?>
 
-<div class="flex flex-col gap-6">
-    <x-auth-header
-        title="Confirm password"
-        description="This is a secure area of the application. Please confirm your password before continuing."
-    />
+<div class="flex flex-col gap-4">
+    <x-auth-header title="Confirmar contraseña" description="Esta es una zona protegida. Confirme su contraseña para continuar." />
 
-    <!-- Session Status -->
-    <x-auth-session-status class="text-center" :status="session('status')" />
+    <x-auth-session-status :status="session('status')" />
 
-    <form wire:submit="confirmPassword" class="flex flex-col gap-6">
-        <!-- Password -->
-        <div class="grid gap-2">
-            <flux:input
-                wire:model="password"
-                id="password"
-                label="{{ __('Password') }}"
-                type="password"
-                name="password"
-                required
-                autocomplete="new-password"
-                placeholder="Password"
-            />
-        </div>
+    <form wire:submit="confirmPassword" class="flex flex-col gap-3" novalidate>
+        <x-campo label="Contraseña" for="password" error="password">
+            <input id="password" type="password" class="inp" wire:model="password" name="password" autocomplete="current-password" autofocus required>
+        </x-campo>
 
-        <flux:button variant="primary" type="submit" class="w-full">{{ __('Confirm') }}</flux:button>
+        <button type="submit" class="btn btn-primary mt-1">Confirmar</button>
     </form>
 </div>

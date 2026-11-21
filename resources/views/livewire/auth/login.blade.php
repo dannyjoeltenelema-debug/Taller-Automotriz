@@ -7,32 +7,50 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Validate;
 use Livewire\Volt\Component;
 
+/**
+ * Acceso del personal. El identificador ("Usuario") es la cédula, no el correo.
+ */
 new #[Layout('components.layouts.auth')] class extends Component {
-    #[Validate('required|string|email')]
-    public string $email = '';
+    public string $cedula = '';
 
-    #[Validate('required|string')]
     public string $password = '';
 
     public bool $remember = false;
+
+    protected function rules(): array
+    {
+        return [
+            'cedula' => ['required', 'string', 'max:13'],
+            'password' => ['required', 'string'],
+        ];
+    }
+
+    protected function messages(): array
+    {
+        return [
+            'cedula.required' => 'Ingrese su usuario.',
+            'cedula.max' => 'El usuario no puede tener más de 13 caracteres.',
+            'password.required' => 'Ingrese su contraseña.',
+        ];
+    }
 
     /**
      * Handle an incoming authentication request.
      */
     public function login(): void
     {
+        $this->cedula = trim($this->cedula);
         $this->validate();
 
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt(['email' => $this->email, 'password' => $this->password], $this->remember)) {
+        if (! Auth::attempt(['cedula' => $this->cedula, 'password' => $this->password], $this->remember)) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
-                'email' => __('auth.failed'),
+                'cedula' => 'Usuario o contraseña incorrectos.',
             ]);
         }
 
@@ -56,10 +74,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
         $seconds = RateLimiter::availableIn($this->throttleKey());
 
         throw ValidationException::withMessages([
-            'email' => __('auth.throttle', [
-                'seconds' => $seconds,
-                'minutes' => ceil($seconds / 60),
-            ]),
+            'cedula' => 'Demasiados intentos. Intente de nuevo en '.max(1, (int) ceil($seconds / 60)).' minuto(s).',
         ]);
     }
 
@@ -68,46 +83,42 @@ new #[Layout('components.layouts.auth')] class extends Component {
      */
     protected function throttleKey(): string
     {
-        return Str::transliterate(Str::lower($this->email).'|'.request()->ip());
+        return Str::transliterate(Str::lower($this->cedula).'|'.request()->ip());
     }
 }; ?>
 
-<div class="flex flex-col gap-6">
-    <a href="{{ route('home') }}" class="text-sm text-zinc-600 dark:text-zinc-400 hover:underline" wire:navigate>← Volver al inicio</a>
+<div class="flex flex-col gap-4">
+    <x-auth-header title="Acceso personal" description="Ingrese su usuario y contraseña para acceder al panel del taller" />
 
-    <x-auth-header title="Acceso personal" description="Ingrese su correo y contraseña para acceder al panel del taller" />
+    <x-auth-session-status :status="session('status')" />
 
-    <!-- Session Status -->
-    <x-auth-session-status class="text-center" :status="session('status')" />
+    <form wire:submit="login" class="flex flex-col gap-3" novalidate>
+        <x-campo label="Usuario" for="cedula" error="cedula">
+            <input id="cedula" type="text" class="inp" wire:model="cedula" name="cedula"
+                   inputmode="numeric" autocomplete="username" autofocus required placeholder="Número de cédula">
+        </x-campo>
 
-    <form wire:submit="login" class="flex flex-col gap-6">
-        <!-- Email Address -->
-        <flux:input wire:model="email" label="{{ __('Email address') }}" type="email" name="email" required autofocus autocomplete="email" placeholder="email@example.com" />
+        <x-campo label="Contraseña" for="password" error="password">
+            <input id="password" type="password" class="inp" wire:model="password" name="password"
+                   autocomplete="current-password" required>
+        </x-campo>
 
-        <!-- Password -->
-        <div class="relative">
-            <flux:input
-                wire:model="password"
-                label="{{ __('Password') }}"
-                type="password"
-                name="password"
-                required
-                autocomplete="current-password"
-                placeholder="Password"
-            />
-
+        <div class="flex items-center justify-between gap-2">
+            <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" wire:model="remember"> Recordarme
+            </label>
             @if (Route::has('password.request'))
-                <x-text-link class="absolute right-0 top-0" href="{{ route('password.request') }}">
-                    {{ __('Forgot your password?') }}
-                </x-text-link>
+                <a href="{{ route('password.request') }}" class="link text-[12.5px]" wire:navigate>¿Olvidó su contraseña?</a>
             @endif
         </div>
 
-        <!-- Remember Me -->
-        <flux:checkbox wire:model="remember" label="{{ __('Remember me') }}" />
-
-        <div class="flex items-center justify-end">
-            <flux:button variant="primary" type="submit" class="w-full">{{ __('Log in') }}</flux:button>
-        </div>
+        <button type="submit" class="btn btn-primary mt-1" wire:loading.attr="disabled" wire:target="login">
+            <span wire:loading.remove wire:target="login">Entrar</span>
+            <span wire:loading wire:target="login">Verificando…</span>
+        </button>
     </form>
+
+    <div class="text-center">
+        <a href="{{ route('home') }}" class="link text-[12.5px]" wire:navigate>← Volver al inicio</a>
+    </div>
 </div>
