@@ -32,7 +32,6 @@ class Listado extends Component
         $this->resetPage();
     }
 
-    public string $aviso = '';
 
     public bool $modal = false;
 
@@ -99,7 +98,8 @@ class Listado extends Component
             'form.telefono' => 'teléfono', 'form.cargo' => 'cargo', 'form.sede_id' => 'sede', 'email' => 'correo', 'password' => 'contraseña',
         ]);
 
-        DB::transaction(function () use ($puedeAcceso) {
+        $nuevo = ! $this->editandoId;
+        $empleadoId = DB::transaction(function () use ($puedeAcceso) {
             $datos = $this->form;
             $datos['telefono'] = $datos['telefono'] ?: null;
             $datos['especialidad'] = $datos['especialidad'] ?: null;
@@ -122,10 +122,15 @@ class Listado extends Component
             if (! $empleado->activo && $empleado->user && $empleado->user_id !== auth()->id()) {
                 $empleado->user->syncRoles([]);
             }
+
+            return $empleado->id;
         });
 
         $this->modal = false;
-        $this->aviso = 'Empleado guardado.';
+        $this->dispatch('toast', mensaje: 'Empleado guardado.');
+        if ($nuevo) {
+            $this->dispatch('fila-nueva', id: 'emp-'.$empleadoId);
+        }
     }
 
     public function render()

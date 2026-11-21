@@ -10,7 +10,6 @@
         @endforeach
     </div>
 
-    @if ($aviso)<div class="alert alert-ok mb-3">{{ $aviso }}</div>@endif
 
     @if ($tab === 'servicios')
         <div class="grid lg:grid-cols-3 gap-3">

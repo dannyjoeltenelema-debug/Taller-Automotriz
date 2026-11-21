@@ -26,10 +26,10 @@
                     @endforeach
                     <option value="todas">Todas</option>
                 </select>
-                <span wire:loading class="muted text-[12px]">Buscando…</span>
             </div>
         </div>
-        <div class="tbl-wrap">
+        <div class="tbl-wrap relative">
+            <x-skeleton-tabla target="buscar,estado" />
             <table class="tbl">
                 <thead>
                 <tr>
@@ -95,7 +95,7 @@
     </div>
 
     @if ($porEntregar)
-        <div class="modal-back" wire:key="modal-entrega">
+        <div class="modal-back" wire:transition wire:key="modal-entrega">
             <div class="modal max-w-[460px]" role="dialog" aria-modal="true">
                 <div class="modal-head"><span>Entregar con cobro pendiente</span><button type="button" wire:click="cancelarEntrega">✕</button></div>
                 <div class="p-4 space-y-2">

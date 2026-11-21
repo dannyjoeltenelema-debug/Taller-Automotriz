@@ -7,19 +7,19 @@
         <button class="btn btn-primary" wire:click="nuevo">+ Nuevo cliente</button>
     </div>
 
-    @if ($aviso)<div class="alert alert-ok mb-3">{{ $aviso }}</div>@endif
 
     <div class="panel">
         <div class="panel-head">
             <input type="search" class="inp max-w-sm" wire:model.live.debounce.300ms="buscar" placeholder="Buscar por cédula/RUC, nombre o placa">
             <span class="muted text-[12px] font-normal">{{ $clientes->total() }} registros</span>
         </div>
-        <div class="tbl-wrap">
+        <div class="tbl-wrap relative">
+            <x-skeleton-tabla target="buscar" />
             <table class="tbl">
                 <thead><tr><th>Nombre / Razón social</th><th>Documento</th><th>Teléfono</th><th>Correo</th><th>Convenio</th><th>Vehículos</th><th class="num">OT</th><th></th></tr></thead>
                 <tbody>
                 @forelse ($clientes as $c)
-                    <tr wire:key="cli-{{ $c->id }}">
+                    <tr wire:key="cli-{{ $c->id }}" data-fila="cli-{{ $c->id }}">
                         <td class="font-medium">{{ $c->nombres }}</td>
                         <td class="whitespace-nowrap"><span class="muted">{{ \App\Models\Cliente::TIPOS_DOCUMENTO[$c->tipo_documento] }}</span> {{ $c->numero_documento }}</td>
                         <td>{{ $c->telefono }}</td>
@@ -46,7 +46,7 @@
     </div>
 
     @if ($modal)
-        <div class="modal-back">
+        <div class="modal-back" wire:transition>
             <form class="modal" wire:submit="guardar">
                 <div class="modal-head"><span>{{ $editandoId ? 'Editar cliente' : 'Nuevo cliente' }}</span><button type="button" wire:click="$set('modal', false)">✕</button></div>
                 <div class="p-4 grid sm:grid-cols-2 gap-3">

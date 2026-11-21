@@ -8,7 +8,6 @@
         <button class="btn btn-primary" wire:click="nueva">+ Nueva cita (recepción)</button>
     </div>
 
-    @if ($aviso)<div class="alert alert-ok mb-3">{{ $aviso }}</div>@endif
 
     <div class="panel">
         <div class="panel-head">
@@ -22,12 +21,13 @@
                 @if ($fecha)<button class="btn btn-sm" wire:click="$set('fecha', '')">Quitar fecha</button>@endif
             </div>
         </div>
-        <div class="tbl-wrap">
+        <div class="tbl-wrap relative">
+            <x-skeleton-tabla target="estado,fecha" />
             <table class="tbl">
                 <thead><tr><th>Solicitada</th><th>Fecha / franja deseada</th><th>Placa / Vehículo</th><th>Cliente</th><th>Motivo</th><th>Origen</th><th>Estado</th><th class="text-right">Acciones</th></tr></thead>
                 <tbody>
                 @forelse ($citas as $c)
-                    <tr wire:key="cita-{{ $c->id }}">
+                    <tr wire:key="cita-{{ $c->id }}" data-fila="cita-{{ $c->id }}">
                         <td class="whitespace-nowrap muted">{{ $c->created_at->format('d/m/Y H:i') }}</td>
                         <td class="whitespace-nowrap"><strong>{{ $c->fecha_deseada->format('d/m/Y') }}</strong><div class="text-[12px]">{{ $c->franja }} · {{ $c->sede->nombre }}</div></td>
                         <td>
@@ -61,7 +61,7 @@
     </div>
 
     @if ($modal)
-        <div class="modal-back">
+        <div class="modal-back" wire:transition>
             <form class="modal max-w-[600px]" wire:submit="guardar">
                 <div class="modal-head"><span>Nueva cita (recepción)</span><button type="button" wire:click="$set('modal', false)">✕</button></div>
                 <div class="p-4 grid sm:grid-cols-2 gap-3">

@@ -12,7 +12,7 @@
             <thead><tr><th>Empresa</th><th>RUC</th><th class="num">% descuento</th><th>Contacto</th><th>Teléfono</th><th class="num">Clientes</th><th></th></tr></thead>
             <tbody>
             @forelse ($empresas as $e)
-                <tr wire:key="emp-{{ $e->id }}" data-fila="emp-{{ $e->id }}">
+                <tr wire:key="emp-{{ $e->id }}" data-fila="emp-{{ $e->id }}" wire:transition="conv-{{ $e->id }}">
                     <td class="font-medium">{{ $e->nombre }}</td>
                     <td>{{ $e->ruc ?? '—' }}</td>
                     <td class="num">{{ number_format($e->porcentaje_descuento, 2) }} %</td>
@@ -33,7 +33,7 @@
     </div>
 
     @if ($modal)
-        <div class="modal-back">
+        <div class="modal-back" wire:transition>
             <form class="modal max-w-[560px]" wire:submit="guardar">
                 <div class="modal-head"><span>{{ $editandoId ? 'Editar empresa colaboradora' : 'Nueva empresa colaboradora' }}</span><button type="button" wire:click="$set('modal', false)">✕</button></div>
                 <div class="p-4 grid sm:grid-cols-2 gap-3">
@@ -55,7 +55,7 @@
     @endif
 
     @if ($porEliminar)
-        <div class="modal-back" wire:key="modal-eliminar">
+        <div class="modal-back" wire:transition wire:key="modal-eliminar">
             <div class="modal max-w-[480px]" role="dialog" aria-modal="true">
                 <div class="modal-head"><span>Eliminar empresa colaboradora</span><button type="button" wire:click="$set('eliminandoId', null)">✕</button></div>
                 <div class="p-4 space-y-2">

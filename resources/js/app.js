@@ -68,3 +68,18 @@ document.addEventListener('alpine:init', () => {
         },
     }))
 })
+
+// Fila recién creada: resaltado tenue del acento que se apaga en ~1 s (clase .fila-nueva en movimiento.css).
+// Livewire: $this->dispatch('fila-nueva', id: 'cli-15') y la fila lleva data-fila="cli-15".
+window.addEventListener('fila-nueva', (e) => {
+    const id = e.detail?.id
+    if (! id) return
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+        const fila = document.querySelector(`[data-fila="${CSS.escape(id)}"]`)
+        if (! fila) return
+        fila.classList.remove('fila-nueva')
+        void fila.offsetWidth // reinicia la animación si ya estaba
+        fila.classList.add('fila-nueva')
+        setTimeout(() => fila.classList.remove('fila-nueva'), 1300)
+    }))
+})

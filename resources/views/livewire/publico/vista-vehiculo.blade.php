@@ -85,7 +85,7 @@
                 <x-campo label="Teléfono de contacto" :req="true" error="cliente_telefono"><input class="inp" wire:model="cliente_telefono" inputmode="tel" autocomplete="tel" placeholder="09XXXXXXXX"></x-campo>
                 <x-campo label="Observación" error="observacion" class="sm:col-span-2"><textarea class="inp" rows="2" wire:model="observacion"></textarea></x-campo>
                 <div class="sm:col-span-2 flex justify-end">
-                    <button class="btn btn-primary" wire:loading.attr="disabled">Solicitar cita</button>
+                    <button class="btn btn-primary" wire:loading.attr="disabled" wire:target="agendar"><span wire:loading.remove wire:target="agendar">Solicitar cita</span><span wire:loading wire:target="agendar">Enviando…</span></button>
                 </div>
             </form>
         @endif

@@ -5,6 +5,6 @@
         <div class="skel mt-1" style="width: 260px"></div>
     </div>
     <div class="panel p-3 space-y-2">
-        @for ($i = 0; $i < 6; $i++)<div class="skel skel-pulso" style="width: {{ 92 - $i * 8 }}%"></div>@endfor
+        @for ($i = 0; $i < 6; $i++)<div class="skel" style="width: {{ 92 - $i * 8 }}%"></div>@endfor
     </div>
 </div>

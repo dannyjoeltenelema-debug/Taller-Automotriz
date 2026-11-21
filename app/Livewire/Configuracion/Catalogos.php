@@ -19,7 +19,6 @@ class Catalogos extends Component
     #[Url]
     public string $tab = 'servicios';
 
-    public string $aviso = '';
 
     // Servicio
     public ?int $servicioId = null;
@@ -59,7 +58,7 @@ class Catalogos extends Component
             'nombre' => $this->s_nombre, 'descripcion' => $this->s_descripcion ?: null, 'precio_referencial' => $this->s_precio,
         ]);
         $this->reset(['servicioId', 's_nombre', 's_descripcion', 's_precio']);
-        $this->aviso = 'Servicio guardado.';
+        $this->dispatch('toast', mensaje: 'Servicio guardado.');
     }
 
     public function toggleServicio(int $id): void
@@ -104,7 +103,7 @@ class Catalogos extends Component
 
         Modelo::resolver($this->m_marca, $this->m_modelo);
         $this->reset('m_modelo');
-        $this->aviso = 'Modelo agregado.';
+        $this->dispatch('toast', mensaje: 'Modelo agregado.');
     }
 
     public function render()

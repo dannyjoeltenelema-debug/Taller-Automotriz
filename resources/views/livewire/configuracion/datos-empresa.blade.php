@@ -3,7 +3,6 @@
         <h1 class="page-title">Datos del taller</h1>
         <div class="page-sub">Se usan en el encabezado del panel, el PDF de la OT, la etiqueta QR y el botón de WhatsApp del portal</div>
     </div>
-    @if ($aviso)<div class="alert alert-ok mb-3">{{ $aviso }}</div>@endif
 
     <form class="panel max-w-[720px]" wire:submit="guardar">
         <div class="panel-body space-y-2">

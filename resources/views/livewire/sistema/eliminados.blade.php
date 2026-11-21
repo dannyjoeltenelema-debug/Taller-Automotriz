@@ -11,7 +11,7 @@
                 <thead><tr><th>Empresa</th><th>RUC</th><th class="num">% descuento</th><th>Eliminada el</th><th></th></tr></thead>
                 <tbody>
                 @forelse ($convenios as $c)
-                    <tr wire:key="del-conv-{{ $c->id }}">
+                    <tr wire:key="del-conv-{{ $c->id }}" wire:transition="del-conv-{{ $c->id }}">
                         <td class="font-medium">{{ $c->nombre }}</td>
                         <td>{{ $c->ruc ?? '—' }}</td>
                         <td class="num">{{ number_format($c->porcentaje_descuento, 2) }} %</td>
@@ -28,7 +28,7 @@
     </div>
 
     @if ($porRestaurar)
-        <div class="modal-back" wire:key="modal-restaurar">
+        <div class="modal-back" wire:transition wire:key="modal-restaurar">
             <div class="modal max-w-[460px]" role="dialog" aria-modal="true">
                 <div class="modal-head"><span>Restaurar empresa colaboradora</span><button type="button" wire:click="$set('restaurandoId', null)">✕</button></div>
                 <div class="p-4 space-y-2">

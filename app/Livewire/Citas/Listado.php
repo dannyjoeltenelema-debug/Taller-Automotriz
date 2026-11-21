@@ -26,7 +26,6 @@ class Listado extends Component
     #[Url(except: '')]
     public string $fecha = '';
 
-    public string $aviso = '';
 
     // Alta desde recepción
     public bool $modal = false;
@@ -46,13 +45,13 @@ class Listado extends Component
     public function confirmar(int $id): void
     {
         Cita::whereKey($id)->where('estado', 'pendiente')->update(['estado' => 'confirmada']);
-        $this->aviso = 'Cita confirmada.';
+        $this->dispatch('toast', mensaje: 'Cita confirmada.');
     }
 
     public function cancelar(int $id): void
     {
         Cita::whereKey($id)->whereIn('estado', ['pendiente', 'confirmada'])->update(['estado' => 'cancelada']);
-        $this->aviso = 'Cita cancelada.';
+        $this->dispatch('toast', mensaje: 'Cita cancelada.');
     }
 
     /** Abre el formulario de OT precargado; al guardarse la OT se enlaza orden_id y la cita pasa a "atendida". */
@@ -103,14 +102,15 @@ class Listado extends Component
             'form.fecha_deseada' => 'fecha', 'form.hora_inicio' => 'franja', 'form.motivo' => 'motivo',
         ]);
 
-        Cita::create($this->form + [
+        $cita = Cita::create($this->form + [
             'vehiculo_id' => Vehiculo::porPlaca($this->form['placa'])?->id,
             'origen' => 'recepcion',
             'estado' => 'confirmada',
         ]);
 
         $this->modal = false;
-        $this->aviso = 'Cita registrada.';
+        $this->dispatch('toast', mensaje: 'Cita registrada.');
+        $this->dispatch('fila-nueva', id: 'cita-'.$cita->id);
     }
 
     public function render()

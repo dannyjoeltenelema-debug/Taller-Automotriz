@@ -34,9 +34,7 @@
         </div>
 
         <div class="tbl-wrap relative">
-            <div wire:loading.delay wire:target="buscar,usuario,modulo,accion,desde,hasta,limpiarFiltros,gotoPage,nextPage,previousPage" class="absolute inset-0 bg-white/60 z-[1] p-3 space-y-2" aria-hidden="true">
-                @for ($i = 0; $i < 6; $i++)<div class="skel skel-pulso" style="width: {{ 90 - $i * 7 }}%"></div>@endfor
-            </div>
+            <x-skeleton-tabla target="buscar,usuario,modulo,accion,desde,hasta,limpiarFiltros" :filas="6" />
             <table class="tbl">
                 <thead><tr><th>Fecha</th><th>Usuario</th><th>Acción</th><th>Módulo</th><th>Registro</th><th>IP</th><th>Cambios</th></tr></thead>
                 <tbody>

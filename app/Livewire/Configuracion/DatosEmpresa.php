@@ -15,7 +15,6 @@ class DatosEmpresa extends Component
 {
     public array $form = [];
 
-    public string $aviso = '';
 
     public function mount(): void
     {
@@ -43,7 +42,7 @@ class DatosEmpresa extends Component
 
         $e = Empresa::first() ?? new Empresa;
         $e->fill(array_map(fn ($v) => $v === '' ? null : $v, $this->form))->save();
-        $this->aviso = 'Datos del taller actualizados.';
+        $this->dispatch('toast', mensaje: 'Datos del taller actualizados.');
     }
 
     public function render()

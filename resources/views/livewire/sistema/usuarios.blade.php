@@ -20,9 +20,7 @@
             <input class="inp w-64" type="search" placeholder="Buscar por nombre o cédula…" wire:model.live.debounce.300ms="buscar" aria-label="Buscar">
         </div>
         <div class="tbl-wrap relative">
-            <div wire:loading.delay wire:target="buscar,gotoPage,nextPage,previousPage" class="absolute inset-0 bg-white/60 z-[1] p-3 space-y-2" aria-hidden="true">
-                @for ($i = 0; $i < 4; $i++)<div class="skel skel-pulso" style="width: {{ 85 - $i * 9 }}%"></div>@endfor
-            </div>
+            <x-skeleton-tabla target="buscar" :filas="4" />
             <table class="tbl">
                 <thead><tr><th>Nombre</th><th>Usuario (cédula)</th><th>Correo</th><th>Rol</th><th>Empleado vinculado</th><th>Acceso</th><th></th></tr></thead>
                 <tbody>
@@ -54,7 +52,7 @@
     </div>
 
     @if ($modal)
-        <div class="modal-back" wire:key="modal-usuario">
+        <div class="modal-back" wire:transition wire:key="modal-usuario">
             <form class="modal max-w-[560px]" wire:submit="guardar">
                 <div class="modal-head"><span>{{ $editandoId ? 'Editar usuario' : 'Nuevo usuario' }}</span><button type="button" wire:click="$set('modal', false)">✕</button></div>
                 <div class="p-4 grid sm:grid-cols-2 gap-3">
@@ -89,7 +87,7 @@
     @endif
 
     @if ($confirmando)
-        <div class="modal-back" wire:key="modal-confirmar">
+        <div class="modal-back" wire:transition wire:key="modal-confirmar">
             <div class="modal max-w-[460px]" role="dialog" aria-modal="true">
                 <div class="modal-head">
                     <span>{{ ['bloquear' => 'Bloquear acceso', 'desbloquear' => 'Desbloquear acceso', 'restablecer' => 'Restablecer contraseña'][$confirmarAccion] }}</span>

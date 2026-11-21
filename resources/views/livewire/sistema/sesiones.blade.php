@@ -37,7 +37,7 @@
     @endif
 
     @if ($cerrandoId)
-        <div class="modal-back" wire:key="modal-cerrar-sesion">
+        <div class="modal-back" wire:transition wire:key="modal-cerrar-sesion">
             <div class="modal max-w-[440px]" role="dialog" aria-modal="true">
                 <div class="modal-head"><span>Cerrar sesión</span><button type="button" wire:click="$set('cerrandoId', null)">✕</button></div>
                 <div class="p-4"><p>La persona tendrá que volver a iniciar sesión. Si usó "Recordarme", podrá entrar de nuevo sin contraseña; para impedirlo, bloquee su usuario en Usuarios y roles.</p></div>

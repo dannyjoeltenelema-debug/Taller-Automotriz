@@ -305,7 +305,7 @@
 
     {{-- ── Modal: Registro rápido de cliente y vehículo ── --}}
     @if ($modalAlta)
-        <div class="modal-back" wire:keydown.escape="$set('modalAlta', false)">
+        <div class="modal-back" wire:transition wire:keydown.escape="$set('modalAlta', false)">
             <form class="modal" wire:submit="guardarAlta">
                 <div class="modal-head">
                     <span>{{ $altaSoloVehiculo ? 'Agregar vehículo a '.$cli?->nombres : 'Registro Rápido de Cliente y Vehículo' }}</span>

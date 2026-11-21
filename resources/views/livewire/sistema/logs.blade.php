@@ -21,9 +21,7 @@
         </div>
 
         <div class="relative">
-            <div wire:loading.delay wire:target="archivo,nivel,irA" class="absolute inset-0 bg-white/60 z-[1] p-3 space-y-2" aria-hidden="true">
-                @for ($i = 0; $i < 6; $i++)<div class="skel skel-pulso" style="width: {{ 90 - $i * 7 }}%"></div>@endfor
-            </div>
+            <x-skeleton-tabla target="archivo,nivel,irA" :filas="6" />
             <div class="tbl-wrap">
                 <table class="tbl">
                     <thead><tr><th style="width:150px">Fecha</th><th style="width:90px">Nivel</th><th>Mensaje</th></tr></thead>

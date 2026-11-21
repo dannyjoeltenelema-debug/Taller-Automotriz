@@ -8,7 +8,6 @@
         <button class="btn btn-primary" wire:click="nuevo">+ Nuevo empleado</button>
     </div>
 
-    @if ($aviso)<div class="alert alert-ok mb-3">{{ $aviso }}</div>@endif
 
     <div class="panel">
         <div class="panel-head">
@@ -17,12 +16,13 @@
                 @foreach (Empleado::CARGOS as $k => $v)<option value="{{ $k }}" wire:key="opt-{{ $k }}">{{ $v }}</option>@endforeach
             </select>
         </div>
-        <div class="tbl-wrap">
+        <div class="tbl-wrap relative">
+            <x-skeleton-tabla target="filtroCargo" />
             <table class="tbl">
                 <thead><tr><th>Apellidos y nombres</th><th>Cédula</th><th>Cargo</th><th>Especialidad</th><th>Sede</th><th>Teléfono</th><th>Acceso al sistema</th><th>Estado</th><th></th></tr></thead>
                 <tbody>
                 @foreach ($empleados as $e)
-                    <tr wire:key="emp-{{ $e->id }}" @class(['muted' => ! $e->activo])>
+                    <tr wire:key="emp-{{ $e->id }}" data-fila="emp-{{ $e->id }}" @class(['muted' => ! $e->activo])>
                         <td class="font-medium">{{ $e->apellidos }}, {{ $e->nombres }}</td>
                         <td>{{ $e->cedula }}</td>
                         <td>{{ Empleado::CARGOS[$e->cargo] }}</td>
@@ -41,7 +41,7 @@
     </div>
 
     @if ($modal)
-        <div class="modal-back">
+        <div class="modal-back" wire:transition>
             <form class="modal max-w-[640px]" wire:submit="guardar">
                 <div class="modal-head"><span>{{ $editandoId ? 'Editar empleado' : 'Nuevo empleado' }}</span><button type="button" wire:click="$set('modal', false)">✕</button></div>
                 <div class="p-4 grid sm:grid-cols-2 gap-3">

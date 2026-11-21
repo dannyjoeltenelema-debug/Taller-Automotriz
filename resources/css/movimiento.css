@@ -1,6 +1,6 @@
 /*
  | Movimiento del panel y del portal: rápido y discreto (software de gestión, no una demo).
- |  - Duraciones 120–200 ms; nada pasa de 250 ms.
+ |  - Duraciones 120–200 ms; nada pasa de 250 ms (única excepción pedida: el resaltado de fila nueva, ~1 s).
  |  - ease-out al entrar, ease-in al salir.
  |  - Solo opacity y transform (nunca width/height/top/left/box-shadow).
  |  - prefers-reduced-motion: solo cambios de opacidad.
@@ -34,27 +34,43 @@
         pointer-events: none; animation: mov-apaga 1s var(--mov-salir) .1s both; }
     .fila-saliendo { opacity: 0; transition: opacity var(--mov-lento) var(--mov-salir); }
 
-    /* ── Skeleton gris neutro (sin brillo animado) ── */
-    .skel { background: #E5E7EB; border-radius: 2px; height: 12px; }
-    .skel-pulso { animation: mov-pulso 1.2s ease-in-out infinite alternate; }
+    /* ── Skeleton gris neutro, estático (sin brillo ni pulso) ── */
+    .skel { background: var(--color-erp-borde-suave); border-radius: 2px; height: 12px; }
 
     /* ── Indicador del ítem activo del sidebar (se desliza con transform) ── */
     .nav-indicador { position: absolute; left: 0; top: 0; width: 3px; background: var(--c-accent);
         transition: transform var(--mov-lento) var(--mov-entrar), opacity var(--mov-rapido) linear; will-change: transform; pointer-events: none; }
 
+    /* ── Botón que disparó una acción Livewire (data-loading): atenuado y sin doble clic ── */
+    .btn[data-loading], .link[data-loading], .nav-link[data-loading] { opacity: .55; pointer-events: none; cursor: progress; transition: opacity var(--mov-rapido) linear; }
+
     /* ── Contenido de la página: fundido corto al navegar ── */
     .pagina-entra { animation: mov-fade var(--mov-normal) var(--mov-entrar) both; }
 }
 
+/* Modales (se montan con @if): fondo con fundido, panel con fundido + escala 0.98 → 1. */
+.modal-back { animation: mov-fade var(--mov-normal) var(--mov-entrar) both; }
+.modal-back > .modal { animation: mov-escala var(--mov-lento) var(--mov-entrar) both; }
+/* Resultados de búsqueda desplegables: fundido + 4 px. */
+.dropdown { animation: mov-arriba var(--mov-normal) var(--mov-entrar) both; }
+
+/*
+ | Salidas con wire:transition (View Transitions de Livewire 4): modal que se cierra, fila eliminada.
+ | Solo se anima lo que SALE (fundido ease-in); los cambios en sitio son instantáneos para no
+ | retrasar la escritura ni los mensajes de validación. Sin soporte del navegador: cambio inmediato.
+ */
+::view-transition-group(*) { animation-duration: 0s; }
+::view-transition-old(*), ::view-transition-new(*) { animation: none; }
+::view-transition-old(*):only-child { animation: mov-fade-salida var(--mov-rapido) var(--mov-salir) both; }
+
 @keyframes mov-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes mov-fade-salida { from { opacity: 1; } to { opacity: 0; } }
 @keyframes mov-escala { from { opacity: 0; transform: scale(.98); } to { opacity: 1; transform: scale(1); } }
 @keyframes mov-arriba { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes mov-apaga { from { opacity: 1; } to { opacity: 0; } }
-@keyframes mov-pulso { from { opacity: 1; } to { opacity: .55; } }
 
 @media (prefers-reduced-motion: reduce) {
     .anim-from-up, .anim-from-scale { transform: none; }
-    .anim-aparece-escala, .anim-aparece-arriba { animation-name: mov-fade; }
+    .anim-aparece-escala, .anim-aparece-arriba, .modal-back > .modal, .dropdown { animation-name: mov-fade; }
     .nav-indicador { transition: opacity var(--mov-rapido) linear; }
-    .skel-pulso { animation: none; }
 }

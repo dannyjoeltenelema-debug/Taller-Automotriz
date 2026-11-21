@@ -12,7 +12,8 @@
             <input type="search" class="inp max-w-sm" wire:model.live.debounce.300ms="buscar" placeholder="Buscar por placa, cédula/RUC, propietario o modelo">
             <span class="muted text-[12px] font-normal">{{ $vehiculos->total() }} registros</span>
         </div>
-        <div class="tbl-wrap">
+        <div class="tbl-wrap relative">
+            <x-skeleton-tabla target="buscar" />
             <table class="tbl">
                 <thead><tr><th>Placa</th><th>Marca / Modelo</th><th>Año</th><th>Color</th><th>Combustible</th><th>Propietario</th><th class="num">Km actual</th><th></th></tr></thead>
                 <tbody>

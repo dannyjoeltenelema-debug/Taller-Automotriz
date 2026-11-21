@@ -23,7 +23,6 @@ class Listado extends Component
 
     public bool $modal = false;
 
-    public string $aviso = '';
 
     public ?int $editandoId = null;
 
@@ -102,10 +101,14 @@ class Listado extends Component
         $datos['direccion'] = $datos['direccion'] ?: null;
         $datos['empresa_colaboradora_id'] = $datos['empresa_colaboradora_id'] ?: null;
 
-        Cliente::updateOrCreate(['id' => $this->editandoId], $datos);
+        $nuevo = ! $this->editandoId;
+        $cliente = Cliente::updateOrCreate(['id' => $this->editandoId], $datos);
+        if ($nuevo) {
+            $this->dispatch('fila-nueva', id: 'cli-'.$cliente->id);
+        }
 
         $this->modal = false;
-        $this->aviso = 'Cliente guardado.';
+        $this->dispatch('toast', mensaje: 'Cliente guardado.');
     }
 
     public function render()
