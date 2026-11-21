@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\InvalidaCatalogos;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,6 +10,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Empleado extends Model
 {
+    use InvalidaCatalogos; // la lista de técnicos activos está en la caché de catálogos
+
     public const CARGOS = [
         'admin' => 'Administrador',
         'asesor' => 'Asesor de servicio',
