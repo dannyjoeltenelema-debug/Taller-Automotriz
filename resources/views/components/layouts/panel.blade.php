@@ -68,6 +68,20 @@
                 <div class="nav-title">Bodega</div>
                 {{-- Módulo Inventario: lo construye el otro programador (routes/inventario.php). --}}
                 <span class="nav-link disabled" title="Módulo en construcción">Inventario <span class="tag-soon">Próximamente</span></span>
+
+                @role('superadmin')
+                    <div class="nav-title">Sistema</div>
+                    @foreach ([
+                        ['sistema.auditoria', 'Auditoría'],
+                        ['sistema.usuarios', 'Usuarios y roles'],
+                        ['sistema.sesiones', 'Sesiones activas'],
+                        ['sistema.eliminados', 'Registros eliminados'],
+                        ['sistema.estado', 'Estado del sistema'],
+                        ['sistema.logs', 'Logs'],
+                    ] as [$ruta, $texto])
+                        <a href="{{ route($ruta) }}" wire:navigate @class(['nav-link', 'active' => request()->routeIs($ruta)])>{{ $texto }}</a>
+                    @endforeach
+                @endrole
             </nav>
         </aside>
 

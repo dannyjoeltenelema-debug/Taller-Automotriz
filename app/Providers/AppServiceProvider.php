@@ -14,6 +14,8 @@ use Illuminate\Auth\Events\Logout;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
+use Livewire\Livewire;
+use Spatie\Permission\Middleware\RoleMiddleware;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -32,6 +34,9 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(Login::class, [AuditarAcceso::class, 'login']);
         Event::listen(Logout::class, [AuditarAcceso::class, 'logout']);
         Event::listen(Failed::class, [AuditarAcceso::class, 'fallido']);
+
+        // Las peticiones Livewire (acciones, carga diferida) re-aplican también el middleware de rol de la ruta original.
+        Livewire::addPersistentMiddleware([RoleMiddleware::class]);
 
         // superadmin tiene acceso total a cualquier permiso/gate.
         Gate::before(fn ($user) => $user->hasRole('superadmin') ? true : null);

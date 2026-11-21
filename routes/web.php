@@ -19,6 +19,7 @@ require __DIR__.'/vehiculos.php';
 require __DIR__.'/citas.php';
 require __DIR__.'/empleados.php';
 require __DIR__.'/publico.php';
+require __DIR__.'/sistema.php';  // solo superadmin
 require __DIR__.'/inventario.php'; // vacío, del otro dev
 
 require __DIR__.'/auth.php';
