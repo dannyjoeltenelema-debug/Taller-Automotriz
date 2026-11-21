@@ -43,10 +43,17 @@ Los tests usan SQLite en memoria (ver `phpunit.xml`), así que no tocan tu base 
 
 Las crea el seeder (`php artisan migrate:fresh --seed`):
 
-| Rol         | Correo                 | Contraseña |
-|-------------|------------------------|------------|
-| Superadmin  | `superadmin@taller.ec` | `password` |
-| Admin       | `admin@taller.ec`      | `password` |
+El inicio de sesión es por **cédula** (campo "Usuario"), no por correo.
+
+| Rol         | Usuario (cédula) | Contraseña   | Nombre                 |
+|-------------|------------------|--------------|------------------------|
+| Superadmin  | `1729057412`     | `1729057412` | Super Administrador 1  |
+| Superadmin  | `1721708608`     | `1721708608` | Super Administrador 2  |
+| Admin       | `1710000009`     | `1710000009` | María Fernanda López (correo `admin@taller.ec`) |
+
+> ⚠️ **Solo para desarrollo:** usar la cédula como contraseña es inseguro. En producción, cambie estas contraseñas por contraseñas fuertes (o no ejecute este seeder) antes de publicar el sistema.
+>
+> La recuperación de contraseña por correo solo funciona para cuentas que tengan un correo registrado.
 
 > El registro público está deshabilitado: las cuentas las crea el administrador desde el panel.
 
