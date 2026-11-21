@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\Auditable;
 use App\Models\Inventario\MovimientoInventario;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -11,6 +12,8 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class OrdenTrabajo extends Model
 {
+    use Auditable;
+
     protected $table = 'ordenes_trabajo';
 
     public const ESTADOS = [

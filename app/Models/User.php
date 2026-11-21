@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\Auditable;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -14,7 +15,10 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable // implements MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, HasRoles, Notifiable;
+    use Auditable, HasFactory, HasRoles, Notifiable;
+
+    /** remember_token cambia en cada login/logout: no aporta a la auditoría. */
+    protected array $auditarExcluir = ['remember_token'];
 
     /**
      * The attributes that are mass assignable.
@@ -48,6 +52,7 @@ class User extends Authenticatable // implements MustVerifyEmail
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'bloqueado_at' => 'datetime',
         ];
     }
 

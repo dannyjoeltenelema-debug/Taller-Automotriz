@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\Auditable;
 use App\Models\Concerns\InvalidaCatalogos;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -10,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Empleado extends Model
 {
-    use InvalidaCatalogos; // la lista de técnicos activos está en la caché de catálogos
+    use Auditable, InvalidaCatalogos; // la lista de técnicos activos está en la caché de catálogos
 
     public const CARGOS = [
         'admin' => 'Administrador',

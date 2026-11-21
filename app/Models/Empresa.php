@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\Auditable;
 use App\Models\Concerns\InvalidaCatalogos;
 use App\Support\Catalogos;
 use Illuminate\Database\Eloquent\Model;
@@ -10,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 /** El taller (una sola fila). */
 class Empresa extends Model
 {
-    use InvalidaCatalogos;
+    use Auditable, InvalidaCatalogos;
 
     protected $table = 'empresa';
 

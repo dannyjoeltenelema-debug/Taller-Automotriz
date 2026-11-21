@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\Auditable;
 use App\Support\Placa;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
@@ -11,6 +12,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Cita extends Model
 {
+    use Auditable;
+
     public const ESTADOS = ['pendiente' => 'Pendiente', 'confirmada' => 'Confirmada', 'atendida' => 'Atendida', 'cancelada' => 'Cancelada'];
 
     public const ORIGENES = ['qr_vehiculo' => 'QR / Portal', 'recepcion' => 'Recepción'];

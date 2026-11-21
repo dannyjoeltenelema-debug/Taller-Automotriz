@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\Auditable;
 use App\Models\Concerns\InvalidaCatalogos;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -13,7 +14,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class EmpresaColaboradora extends Model
 {
-    use InvalidaCatalogos, SoftDeletes;
+    use Auditable, InvalidaCatalogos, SoftDeletes;
 
     protected $table = 'empresas_colaboradoras';
 

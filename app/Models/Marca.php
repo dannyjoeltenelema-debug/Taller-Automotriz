@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\Auditable;
 use App\Models\Concerns\InvalidaCatalogos;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Marca extends Model
 {
-    use InvalidaCatalogos;
+    use Auditable, InvalidaCatalogos;
 
     protected $fillable = ['nombre'];
 

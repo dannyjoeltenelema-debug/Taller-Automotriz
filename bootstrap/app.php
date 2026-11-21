@@ -21,6 +21,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'role_or_permission' => RoleOrPermissionMiddleware::class,
         ]);
 
+        // Un usuario bloqueado desde Sistema > Usuarios pierde la sesión en su siguiente petición.
+        $middleware->web(append: [\App\Http\Middleware\BloquearUsuarioInhabilitado::class]);
+
         // Usuarios ya autenticados que visitan /login van al panel.
         $middleware->redirectUsersTo(fn () => route('ordenes.index'));
     })

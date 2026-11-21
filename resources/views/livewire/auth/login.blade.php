@@ -46,12 +46,18 @@ new #[Layout('components.layouts.auth')] class extends Component {
 
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt(['cedula' => $this->cedula, 'password' => $this->password], $this->remember)) {
+        // Un usuario bloqueado (Sistema > Usuarios) no entra aunque la contraseña sea correcta.
+        $credenciales = ['cedula' => $this->cedula, 'password' => $this->password];
+        if (! Auth::attemptWhen($credenciales, fn ($user) => $user->bloqueado_at === null, $this->remember)) {
             RateLimiter::hit($this->throttleKey());
 
-            throw ValidationException::withMessages([
-                'cedula' => 'Usuario o contraseña incorrectos.',
-            ]);
+            // Solo se revela el bloqueo a quien ya demostró conocer la contraseña.
+            $bloqueado = Auth::getProvider()->retrieveByCredentials(['cedula' => $this->cedula]);
+            $mensaje = $bloqueado?->bloqueado_at && Auth::getProvider()->validateCredentials($bloqueado, $credenciales)
+                ? 'Su acceso al sistema está bloqueado. Consulte con el administrador.'
+                : 'Usuario o contraseña incorrectos.';
+
+            throw ValidationException::withMessages(['cedula' => $mensaje]);
         }
 
         RateLimiter::clear($this->throttleKey());
