@@ -10,6 +10,7 @@ use App\Models\Cliente;
 use App\Models\Empleado;
 use App\Models\Empresa;
 use App\Models\OrdenTrabajo;
+use App\Models\Sede;
 use App\Models\Servicio;
 use App\Models\User;
 use App\Models\Vehiculo;
@@ -76,7 +77,7 @@ class BugsVerificacionTest extends TestCase
     // 2 ───────── Mecánicos asignables como técnicos (cargos en config)
     public function test_bug2_mecanicos_son_asignables(): void
     {
-        $mecanico = Empleado::create(['sede_id' => 1, 'nombres' => 'Mario', 'apellidos' => 'Mecánico', 'cedula' => '0102030405', 'cargo' => 'mecanico']);
+        $mecanico = Empleado::create(['sede_id' => Sede::firstOrFail()->id, 'nombres' => 'Mario', 'apellidos' => 'Mecánico', 'cedula' => '0102030405', 'cargo' => 'mecanico']);
         $this->assertTrue(Empleado::tecnicosActivos()->whereKey($mecanico->id)->exists());
 
         $v = Vehiculo::firstOrFail();

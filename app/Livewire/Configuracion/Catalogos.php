@@ -19,7 +19,6 @@ class Catalogos extends Component
     #[Url]
     public string $tab = 'servicios';
 
-
     // Servicio
     public ?int $servicioId = null;
 

@@ -23,7 +23,6 @@ class Listado extends Component
 
     public bool $modal = false;
 
-
     public ?int $editandoId = null;
 
     public string $tipo_documento = 'cedula';

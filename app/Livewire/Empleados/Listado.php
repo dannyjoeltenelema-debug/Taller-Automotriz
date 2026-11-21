@@ -32,7 +32,6 @@ class Listado extends Component
         $this->resetPage();
     }
 
-
     public bool $modal = false;
 
     public ?int $editandoId = null;

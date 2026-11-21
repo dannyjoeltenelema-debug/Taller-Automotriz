@@ -15,7 +15,6 @@ class DatosEmpresa extends Component
 {
     public array $form = [];
 
-
     public function mount(): void
     {
         $e = Empresa::actual() ?? new Empresa(['iva_porcentaje' => config('taller.iva_por_defecto')]);

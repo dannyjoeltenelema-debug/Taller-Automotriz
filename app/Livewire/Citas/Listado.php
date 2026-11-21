@@ -26,7 +26,6 @@ class Listado extends Component
     #[Url(except: '')]
     public string $fecha = '';
 
-
     // Alta desde recepción
     public bool $modal = false;
 
