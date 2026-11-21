@@ -33,7 +33,7 @@ class TallerModulosTest extends TestCase
 
     private function admin(): User
     {
-        return User::where('email', 'admin@taller.ec')->first();
+        return User::where('cedula', '1710000009')->first();
     }
 
     public function test_todas_las_pantallas_del_panel_cargan(): void
@@ -53,7 +53,7 @@ class TallerModulosTest extends TestCase
     public function test_datos_del_taller_solo_para_superadmin(): void
     {
         $this->actingAs($this->admin())->get(route('configuracion.empresa'))->assertForbidden();
-        $this->actingAs(User::where('email', 'superadmin@taller.ec')->first())->get(route('configuracion.empresa'))->assertOk();
+        $this->actingAs(User::where('cedula', '1729057412')->first())->get(route('configuracion.empresa'))->assertOk();
     }
 
     public function test_normalizacion_de_placa_y_validacion_de_documentos(): void
@@ -95,9 +95,9 @@ class TallerModulosTest extends TestCase
             ->call('nuevo')
             ->set('form.nombres', 'Andrea')->set('form.apellidos', 'Mena')->set('form.cedula', '1713579132')
             ->set('form.cargo', 'asesor')->set('form.sede_id', $sede->id)
-            ->set('crearAcceso', true)->set('email', 'andrea@taller.ec')->set('password', 'secreto123')
+            ->set('crearAcceso', true)->set('email', '')->set('password', 'secreto123')
             ->call('guardar')->assertHasNoErrors();
-        $user = User::where('email', 'andrea@taller.ec')->first();
+        $user = User::where('cedula', '1713579132')->first();
         $this->assertTrue($user->hasRole('admin'));
         $this->assertSame($user->id, Empleado::where('cedula', '1713579132')->first()->user_id);
     }

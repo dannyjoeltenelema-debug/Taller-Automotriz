@@ -3,10 +3,10 @@
 namespace App\Livewire\Vehiculos;
 
 use App\Models\Cliente;
-use App\Models\Marca;
 use App\Models\Modelo;
 use App\Models\Vehiculo;
 use App\Rules\PlacaEcuador;
+use App\Support\Catalogos;
 use App\Support\Placa;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Computed;
@@ -41,15 +41,18 @@ class Formulario extends Component
 
     public string $transmision = 'manual';
 
-    public $intervalo_mantenimiento_km = 5000;
+    public $intervalo_mantenimiento_km = null;
 
     public bool $activo = true;
 
     public function mount(?Vehiculo $vehiculo = null): void
     {
+        $this->intervalo_mantenimiento_km = config('taller.mantenimiento.intervalo_km');
+
         if ($vehiculo?->exists) {
             $vehiculo->load('modelo.marca');
-            $this->vehiculo = $vehiculo;
+            // Sin relaciones en la propiedad pública: Livewire re-consulta en cada roundtrip todo lo cargado.
+            $this->vehiculo = $vehiculo->withoutRelations();
             $this->cliente_id = $vehiculo->cliente_id;
             $this->placa = $vehiculo->placa_formateada;
             $this->marca = $vehiculo->modelo->marca->nombre;
@@ -95,7 +98,7 @@ class Formulario extends Component
     #[Computed]
     public function modelosSugeridos()
     {
-        return Marca::where('nombre', trim($this->marca))->first()?->modelos()->orderBy('nombre')->pluck('nombre') ?? collect();
+        return Catalogos::modelosDe($this->marca);
     }
 
     public function guardar()
@@ -147,7 +150,7 @@ class Formulario extends Component
     public function render()
     {
         return view('livewire.vehiculos.formulario', [
-            'marcas' => Marca::orderBy('nombre')->pluck('nombre'),
+            'marcas' => Catalogos::marcas(),
         ])->title($this->vehiculo ? 'Editar '.$this->vehiculo->placa_formateada : 'Nuevo vehículo');
     }
 }

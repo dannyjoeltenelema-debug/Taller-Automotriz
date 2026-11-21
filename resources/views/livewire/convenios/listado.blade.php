@@ -29,6 +29,7 @@
             @endforelse
             </tbody>
         </table>
+        @if ($empresas->hasPages())<div class="px-3 py-2 border-t border-[var(--c-border)]">{{ $empresas->links() }}</div>@endif
     </div>
 
     @if ($modal)

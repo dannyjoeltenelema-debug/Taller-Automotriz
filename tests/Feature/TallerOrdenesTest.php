@@ -25,7 +25,7 @@ class TallerOrdenesTest extends TestCase
 
     private function admin(): User
     {
-        return User::where('email', 'admin@taller.ec')->first();
+        return User::where('cedula', '1710000009')->first();
     }
 
     public function test_invitado_es_redirigido_al_login(): void

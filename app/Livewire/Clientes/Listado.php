@@ -3,8 +3,8 @@
 namespace App\Livewire\Clientes;
 
 use App\Models\Cliente;
-use App\Models\EmpresaColaboradora;
 use App\Rules\CedulaRucEcuador;
+use App\Support\Catalogos;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -112,11 +112,12 @@ class Listado extends Component
     {
         return view('livewire.clientes.listado', [
             'clientes' => Cliente::buscar($this->buscar)
-                ->with(['empresaColaboradora', 'vehiculos'])
+                ->select(['id', 'tipo_documento', 'numero_documento', 'nombres', 'telefono', 'email', 'empresa_colaboradora_id'])
+                ->with(['empresaColaboradora:id,nombre,porcentaje_descuento', 'vehiculos:id,cliente_id,placa'])
                 ->withCount('ordenes')
                 ->orderBy('nombres')
                 ->paginate(20),
-            'convenios' => EmpresaColaboradora::orderBy('nombre')->get(),
+            'convenios' => Catalogos::convenios(),
         ]);
     }
 }

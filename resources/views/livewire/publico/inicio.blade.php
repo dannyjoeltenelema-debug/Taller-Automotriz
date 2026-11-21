@@ -33,7 +33,7 @@
             <div class="border-t border-[var(--c-border)]">
                 <div class="px-3 pt-3 pb-1 font-semibold">Seleccione su vehículo</div>
                 @foreach ($opciones as $o)
-                    <a href="{{ route('publico.vehiculo', $o['token']) }}" wire:navigate class="nav-link py-2 border-t border-[var(--c-border-soft)]">
+                    <a href="{{ route('publico.vehiculo', $o['token']) }}" wire:key="op-{{ $o['token'] }}" wire:navigate class="nav-link py-2 border-t border-[var(--c-border-soft)]">
                         <span><span class="placa">{{ $o['placa'] }}</span> <span class="muted">· {{ $o['detalle'] }}</span></span> ›
                     </a>
                 @endforeach

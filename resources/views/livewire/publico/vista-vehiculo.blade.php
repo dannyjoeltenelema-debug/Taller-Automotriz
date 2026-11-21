@@ -40,7 +40,7 @@
                 <thead><tr><th>Fecha</th><th class="num">Km</th><th>Servicios realizados</th></tr></thead>
                 <tbody>
                 @forelse ($historial as $o)
-                    <tr>
+                    <tr wire:key="hist-{{ $o->id }}">
                         <td class="whitespace-nowrap">{{ $o->fecha_ingreso->format('d/m/Y') }}</td>
                         <td class="num">{{ number_format($o->kilometraje_ingreso, 0, ',', '.') }}</td>
                         <td>{{ $o->items->pluck('descripcion')->join(', ') }}</td>
@@ -65,16 +65,16 @@
         @else
             <form class="panel-body grid sm:grid-cols-2 gap-3" wire:submit="agendar">
                 <x-campo label="Fecha deseada" :req="true" error="fecha_deseada">
-                    <input type="date" class="inp" wire:model="fecha_deseada" min="{{ now()->toDateString() }}" max="{{ now()->addDays(60)->toDateString() }}">
+                    <input type="date" class="inp" wire:model="fecha_deseada" min="{{ now()->toDateString() }}" max="{{ now()->addDays($diasMax)->toDateString() }}">
                 </x-campo>
                 <x-campo label="Franja horaria" :req="true" error="hora_inicio">
                     <select class="inp" wire:model="hora_inicio">
-                        @foreach (Cita::FRANJAS as $f)<option value="{{ $f }}">{{ Cita::etiquetaFranja($f) }}</option>@endforeach
+                        @foreach (Cita::franjas() as $f)<option value="{{ $f }}">{{ Cita::etiquetaFranja($f) }}</option>@endforeach
                     </select>
                 </x-campo>
                 @if ($sedes->count() > 1)
                     <x-campo label="Sede" :req="true" error="sede_id" class="sm:col-span-2">
-                        <select class="inp" wire:model="sede_id">@foreach ($sedes as $s)<option value="{{ $s->id }}">{{ $s->nombre }} — {{ $s->direccion }}</option>@endforeach</select>
+                        <select class="inp" wire:model="sede_id">@foreach ($sedes as $s)<option value="{{ $s->id }}" wire:key="sede-{{ $s->id }}">{{ $s->nombre }} — {{ $s->direccion }}</option>@endforeach</select>
                     </x-campo>
                 @endif
                 <x-campo label="Servicio / motivo" :req="true" error="motivo" class="sm:col-span-2">

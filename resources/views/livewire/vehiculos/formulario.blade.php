@@ -18,7 +18,7 @@
                     @if ($this->resultadosCliente->isNotEmpty())
                         <div class="dropdown">
                             @foreach ($this->resultadosCliente as $r)
-                                <button type="button" wire:click="seleccionarCliente({{ $r->id }})">{{ $r->nombres }} <span class="muted">· {{ $r->numero_documento }}</span></button>
+                                <button type="button" wire:click="seleccionarCliente({{ $r->id }})" wire:key="rc-{{ $r->id }}">{{ $r->nombres }} <span class="muted">· {{ $r->numero_documento }}</span></button>
                             @endforeach
                         </div>
                     @endif

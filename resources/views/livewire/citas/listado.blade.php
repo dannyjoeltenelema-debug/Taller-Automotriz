@@ -67,13 +67,13 @@
                 <div class="p-4 grid sm:grid-cols-2 gap-3">
                     <x-campo label="Placa" :req="true" error="form.placa"><input class="inp placa uppercase" wire:model.blur="form.placa" placeholder="PBA-4521"></x-campo>
                     <x-campo label="Sede" :req="true" error="form.sede_id">
-                        <select class="inp" wire:model="form.sede_id">@foreach ($sedes as $s)<option value="{{ $s->id }}">{{ $s->nombre }}</option>@endforeach</select>
+                        <select class="inp" wire:model="form.sede_id">@foreach ($sedes as $s)<option value="{{ $s->id }}" wire:key="sede-{{ $s->id }}">{{ $s->nombre }}</option>@endforeach</select>
                     </x-campo>
                     <x-campo label="Nombre del cliente" :req="true" error="form.cliente_nombre"><input class="inp" wire:model="form.cliente_nombre"></x-campo>
                     <x-campo label="Teléfono" :req="true" error="form.cliente_telefono"><input class="inp" wire:model="form.cliente_telefono"></x-campo>
                     <x-campo label="Fecha deseada" :req="true" error="form.fecha_deseada"><input type="date" class="inp" wire:model="form.fecha_deseada" min="{{ now()->toDateString() }}"></x-campo>
                     <x-campo label="Franja horaria" :req="true" error="form.hora_inicio">
-                        <select class="inp" wire:model="form.hora_inicio">@foreach (Cita::FRANJAS as $f)<option value="{{ $f }}">{{ Cita::etiquetaFranja($f) }}</option>@endforeach</select>
+                        <select class="inp" wire:model="form.hora_inicio">@foreach (Cita::franjas() as $f)<option value="{{ $f }}">{{ Cita::etiquetaFranja($f) }}</option>@endforeach</select>
                     </x-campo>
                     <x-campo label="Motivo / servicio" :req="true" error="form.motivo" class="sm:col-span-2"><input class="inp" wire:model="form.motivo"></x-campo>
                     <x-campo label="Observación" error="form.observacion" class="sm:col-span-2"><textarea class="inp" rows="2" wire:model="form.observacion"></textarea></x-campo>

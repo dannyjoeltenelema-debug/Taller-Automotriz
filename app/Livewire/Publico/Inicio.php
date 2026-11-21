@@ -28,25 +28,26 @@ class Inicio extends Component
 
         // Las acciones Livewire no pasan por el throttle de la ruta: limitador propio por IP.
         $clave = 'consulta-publica:'.request()->ip();
-        if (RateLimiter::tooManyAttempts($clave, 15)) {
+        if (RateLimiter::tooManyAttempts($clave, config('taller.portal.consultas_max'))) {
             $this->addError('valor', 'Demasiadas consultas. Intente nuevamente en '.RateLimiter::availableIn($clave).' segundos.');
 
             return null;
         }
-        RateLimiter::hit($clave, 60);
+        RateLimiter::hit($clave, config('taller.portal.consultas_ventana_seg'));
 
         $valor = trim($this->valor);
 
         if ($this->tipo === 'placa') {
             $this->validate(['valor' => ['required', 'string', 'max:10']], [], ['valor' => 'placa']);
-            $vehiculo = Vehiculo::where('placa', Placa::normalizar($valor))->where('activo', true)->first();
-            if (! $vehiculo) {
+            // Una consulta por índice único (placa) y solo la columna que se usa.
+            $token = Vehiculo::where('placa', Placa::normalizar($valor))->where('activo', true)->value('qr_token');
+            if (! $token) {
                 $this->addError('valor', 'No encontramos un vehículo registrado con esa placa.');
 
                 return null;
             }
 
-            return $this->redirectRoute('publico.vehiculo', $vehiculo->qr_token, navigate: true);
+            return $this->redirectRoute('publico.vehiculo', $token, navigate: true);
         }
 
         $this->validate(['valor' => ['required', 'regex:/^\d{10}(\d{3})?$/']], [
@@ -54,8 +55,12 @@ class Inicio extends Component
         ], ['valor' => 'cédula/RUC']);
 
         // Coincidencia EXACTA de documento (no por prefijo) para evitar barridos.
-        $cliente = Cliente::where('numero_documento', $valor)->first();
-        $vehiculos = $cliente?->vehiculos()->where('activo', true)->with('modelo.marca')->orderBy('placa')->get() ?? collect();
+        $vehiculos = Vehiculo::query()
+            ->whereIn('cliente_id', Cliente::select('id')->where('numero_documento', $valor))
+            ->where('activo', true)
+            ->with(['modelo:id,marca_id,nombre', 'modelo.marca:id,nombre'])
+            ->orderBy('placa')
+            ->get(['id', 'qr_token', 'placa', 'modelo_id', 'anio', 'color']);
 
         if ($vehiculos->isEmpty()) {
             $this->addError('valor', 'No encontramos vehículos asociados a ese documento.');

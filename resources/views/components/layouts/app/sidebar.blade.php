@@ -51,7 +51,7 @@
 
                                 <div class="grid flex-1 text-left text-sm leading-tight">
                                     <span class="truncate font-semibold">{{ auth()->user()->name }}</span>
-                                    <span class="truncate text-xs">{{ auth()->user()->email }}</span>
+                                    <span class="truncate text-xs">{{ auth()->user()->cedula }}</span>
                                 </div>
                             </div>
                         </div>
@@ -101,7 +101,7 @@
 
                                 <div class="grid flex-1 text-left text-sm leading-tight">
                                     <span class="truncate font-semibold">{{ auth()->user()->name }}</span>
-                                    <span class="truncate text-xs">{{ auth()->user()->email }}</span>
+                                    <span class="truncate text-xs">{{ auth()->user()->cedula }}</span>
                                 </div>
                             </div>
                         </div>

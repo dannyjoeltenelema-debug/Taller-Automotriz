@@ -3,9 +3,9 @@
 namespace App\Livewire\Citas;
 
 use App\Models\Cita;
-use App\Models\Sede;
 use App\Models\Vehiculo;
 use App\Rules\PlacaEcuador;
+use App\Support\Catalogos;
 use App\Support\Placa;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
@@ -70,9 +70,9 @@ class Listado extends Component
     {
         $this->resetValidation();
         $this->form = [
-            'sede_id' => auth()->user()->empleado?->sede_id ?? Sede::value('id'),
+            'sede_id' => auth()->user()->empleado?->sede_id ?? Catalogos::sedes()->min('id'),
             'placa' => '', 'cliente_nombre' => '', 'cliente_telefono' => '',
-            'fecha_deseada' => now()->addDay()->toDateString(), 'hora_inicio' => Cita::FRANJAS[0],
+            'fecha_deseada' => now()->addDay()->toDateString(), 'hora_inicio' => Cita::franjas()[0],
             'motivo' => '', 'observacion' => '',
         ];
         $this->modal = true;
@@ -95,7 +95,7 @@ class Listado extends Component
             'form.cliente_nombre' => ['required', 'string', 'max:150'],
             'form.cliente_telefono' => ['required', 'regex:/^\+?\d{9,13}$/'],
             'form.fecha_deseada' => ['required', 'date', 'after_or_equal:today'],
-            'form.hora_inicio' => ['required', Rule::in(Cita::FRANJAS)],
+            'form.hora_inicio' => ['required', Rule::in(Cita::franjas())],
             'form.motivo' => ['required', 'string', 'max:150'],
             'form.observacion' => ['nullable', 'string', 'max:1000'],
         ], [], [
@@ -116,16 +116,19 @@ class Listado extends Component
     public function render()
     {
         $citas = Cita::query()
-            ->with(['vehiculo.modelo.marca', 'orden', 'sede'])
+            ->with([
+                'vehiculo:id,modelo_id', 'vehiculo.modelo:id,marca_id,nombre', 'vehiculo.modelo.marca:id,nombre',
+                'orden:id,codigo', 'sede:id,nombre',
+            ])
             ->when($this->estado === 'abiertas', fn ($q) => $q->whereIn('estado', ['pendiente', 'confirmada']))
             ->when(! in_array($this->estado, ['abiertas', 'todas']), fn ($q) => $q->where('estado', $this->estado))
-            ->when($this->fecha, fn ($q) => $q->whereDate('fecha_deseada', $this->fecha))
+            ->when($this->fecha, fn ($q) => $q->delDia($this->fecha))
             ->orderBy('fecha_deseada')->orderBy('hora_inicio')
             ->paginate(25);
 
         return view('livewire.citas.listado', [
             'citas' => $citas,
-            'sedes' => Sede::where('activa', true)->orderBy('nombre')->get(),
+            'sedes' => Catalogos::sedesActivas(),
         ]);
     }
 }

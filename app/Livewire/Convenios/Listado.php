@@ -8,11 +8,14 @@ use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 #[Layout('components.layouts.panel')]
 #[Title('Empresas colaboradoras')]
 class Listado extends Component
 {
+    use WithPagination;
+
     public bool $modal = false;
 
     public string $aviso = '';
@@ -74,7 +77,7 @@ class Listado extends Component
     public function render()
     {
         return view('livewire.convenios.listado', [
-            'empresas' => EmpresaColaboradora::withCount('clientes')->orderBy('nombre')->get(),
+            'empresas' => EmpresaColaboradora::withCount('clientes')->orderBy('nombre')->paginate(50),
         ]);
     }
 }

@@ -19,7 +19,7 @@
     <div class="panel">
         <div class="panel-head">
             <div class="flex flex-wrap items-center gap-2 w-full">
-                <input type="search" wire:model.live.debounce.350ms="buscar" class="inp max-w-sm"
+                <input type="search" wire:model.live.debounce.300ms="buscar" class="inp max-w-sm"
                        placeholder="Buscar por placa, cédula/RUC, nombre o código OT">
                 <select wire:model.live="estado" class="inp w-auto">
                     <option value="activas">Activas (no entregadas)</option>

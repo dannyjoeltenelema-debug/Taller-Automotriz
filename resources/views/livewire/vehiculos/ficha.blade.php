@@ -46,7 +46,7 @@
             <div class="panel-head">Órdenes en curso</div>
             <table class="tbl">
                 @foreach ($activas as $o)
-                    <tr><td><a href="{{ route('ordenes.edit', $o) }}" wire:navigate class="link font-semibold">{{ $o->codigo }}</a></td><td>{{ $o->fecha_ingreso->format('d/m/Y') }}</td><td><x-estado :estado="$o->estado" /></td><td class="num">{{ \App\Support\Dinero::mostrar($o->total) }}</td></tr>
+                    <tr wire:key="act-{{ $o->id }}"><td><a href="{{ route('ordenes.edit', $o) }}" wire:navigate class="link font-semibold">{{ $o->codigo }}</a></td><td>{{ $o->fecha_ingreso->format('d/m/Y') }}</td><td><x-estado :estado="$o->estado" /></td><td class="num">{{ \App\Support\Dinero::mostrar($o->total) }}</td></tr>
                 @endforeach
             </table>
         </section>
@@ -59,7 +59,7 @@
                 <thead><tr><th>OT</th><th>Fecha</th><th class="num">Km</th><th>Servicios</th><th>Técnico</th><th class="num">Total</th></tr></thead>
                 <tbody>
                 @forelse ($historial as $o)
-                    <tr>
+                    <tr wire:key="hist-{{ $o->id }}">
                         <td><a href="{{ route('ordenes.edit', $o) }}" wire:navigate class="link">{{ $o->codigo }}</a></td>
                         <td>{{ $o->fecha_ingreso->format('d/m/Y') }}</td>
                         <td class="num">{{ number_format($o->kilometraje_ingreso, 0, ',', '.') }}</td>

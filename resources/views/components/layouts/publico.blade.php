@@ -9,10 +9,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="ui min-h-screen flex flex-col">
-    <header class="topbar flex items-center justify-between px-4">
-        <a href="{{ route('home') }}" wire:navigate class="font-semibold text-[15px] truncate">{{ $empresa?->razon_social ?? config('app.name') }}</a>
-        <a href="{{ route('login') }}" class="btn btn-sm">Acceso Personal</a>
-    </header>
+    @include('partials.topbar-publico')
 
     <main class="flex-1 w-full max-w-3xl mx-auto px-4 py-6">
         {{ $slot }}

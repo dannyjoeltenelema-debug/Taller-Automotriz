@@ -30,7 +30,8 @@ class Listado extends Component
         $t = trim($this->buscar);
 
         $vehiculos = Vehiculo::query()
-            ->with(['modelo.marca', 'cliente'])
+            ->select(['id', 'placa', 'modelo_id', 'cliente_id', 'anio', 'color', 'tipo_combustible', 'kilometraje_actual'])
+            ->with(['modelo:id,marca_id,nombre', 'modelo.marca:id,nombre', 'cliente:id,nombres,numero_documento'])
             ->when($t !== '', function (Builder $q) use ($t) {
                 if (ctype_digit($t)) {
                     $q->whereHas('cliente', fn ($c) => $c->where('numero_documento', 'like', $t.'%'));

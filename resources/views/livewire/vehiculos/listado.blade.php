@@ -9,7 +9,7 @@
 
     <div class="panel">
         <div class="panel-head">
-            <input type="search" class="inp max-w-sm" wire:model.live.debounce.350ms="buscar" placeholder="Buscar por placa, cédula/RUC, propietario o modelo">
+            <input type="search" class="inp max-w-sm" wire:model.live.debounce.300ms="buscar" placeholder="Buscar por placa, cédula/RUC, propietario o modelo">
             <span class="muted text-[12px] font-normal">{{ $vehiculos->total() }} registros</span>
         </div>
         <div class="tbl-wrap">

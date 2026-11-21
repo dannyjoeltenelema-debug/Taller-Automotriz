@@ -2,20 +2,17 @@
 
 namespace App\Livewire\Ordenes;
 
-use App\Models\ChecklistItem;
 use App\Models\Cita;
 use App\Models\Cliente;
 use App\Models\Empleado;
-use App\Models\EmpresaColaboradora;
-use App\Models\Marca;
 use App\Models\Modelo;
 use App\Models\OrdenTrabajo;
-use App\Models\Sede;
 use App\Models\Servicio;
 use App\Models\Vehiculo;
 use App\Rules\CedulaRucEcuador;
 use App\Rules\PlacaEcuador;
 use App\Services\CalculadorDescuento;
+use App\Support\Catalogos;
 use App\Support\Dinero;
 use App\Support\Placa;
 use Illuminate\Support\Facades\DB;
@@ -103,8 +100,8 @@ class Formulario extends Component
         }
 
         $this->fecha_ingreso = now()->format('Y-m-d\TH:i');
-        $this->sede_id = auth()->user()->empleado?->sede_id ?? Sede::where('activa', true)->value('id');
-        $this->checklist = ChecklistItem::where('activo', true)->orderBy('orden')->get()
+        $this->sede_id = auth()->user()->empleado?->sede_id ?? Catalogos::sedesActivas()->min('id');
+        $this->checklist = Catalogos::checklist()
             ->map(fn ($c) => ['nombre' => $c->nombre, 'ok' => true, 'nota' => ''])->all();
         $this->resetNuevo();
 
@@ -167,7 +164,16 @@ class Formulario extends Component
     #[Computed]
     public function vehiculo(): ?Vehiculo
     {
-        return $this->vehiculo_id ? Vehiculo::with('modelo.marca')->find($this->vehiculo_id) : null;
+        if (! $this->vehiculo_id) {
+            return null;
+        }
+
+        // Reutiliza el vehículo ya cargado con el cliente (vehiculos.modelo.marca) si corresponde;
+        // si el cliente cacheado en este request es otro o no lo tiene, se consulta.
+        $cli = $this->cliente;
+        $enCliente = $cli && $cli->id === $this->cliente_id ? $cli->vehiculos->firstWhere('id', $this->vehiculo_id) : null;
+
+        return $enCliente ?? Vehiculo::with('modelo.marca')->find($this->vehiculo_id);
     }
 
     public function seleccionarCliente(int $id, ?int $vehiculoId = null): void
@@ -222,9 +228,7 @@ class Formulario extends Component
     #[Computed]
     public function modelosSugeridos()
     {
-        $marca = Marca::where('nombre', trim($this->nuevo['marca'] ?? ''))->first();
-
-        return $marca ? $marca->modelos()->orderBy('nombre')->pluck('nombre') : collect();
+        return Catalogos::modelosDe($this->nuevo['marca'] ?? '');
     }
 
     public function guardarAlta(): void
@@ -316,7 +320,7 @@ class Formulario extends Component
         if ($this->proximoManual || ! is_numeric($this->kilometraje_ingreso)) {
             return;
         }
-        $intervalo = $this->vehiculo?->intervalo_mantenimiento_km ?? 5000;
+        $intervalo = $this->vehiculo?->intervalo_mantenimiento_km ?? config('taller.mantenimiento.intervalo_km');
         $this->proximo_kilometraje = (int) $this->kilometraje_ingreso + $intervalo;
     }
 
@@ -346,8 +350,9 @@ class Formulario extends Component
         $this->items = array_values($this->items);
     }
 
-    /** Líneas tipo=producto ya cargadas por el módulo Inventario (solo lectura aquí). */
-    private function productosExistentes()
+    /** Líneas tipo=producto ya cargadas por el módulo Inventario (solo lectura aquí). Una consulta por request. */
+    #[Computed]
+    public function productosExistentes()
     {
         return $this->orden?->exists
             ? $this->orden->items()->where('tipo', 'producto')->get(['descripcion', 'cantidad', 'precio_unitario', 'subtotal'])
@@ -359,7 +364,7 @@ class Formulario extends Component
     {
         $lineas = collect($this->items)
             ->map(fn ($i) => ['cantidad' => is_numeric($i['cantidad']) ? $i['cantidad'] : 0, 'precio_unitario' => is_numeric($i['precio_unitario']) ? $i['precio_unitario'] : 0])
-            ->concat($this->productosExistentes()->map(fn ($p) => $p->only(['cantidad', 'precio_unitario'])));
+            ->concat($this->productosExistentes->map(fn ($p) => $p->only(['cantidad', 'precio_unitario'])));
 
         return app(CalculadorDescuento::class)->calcular($lineas, $this->cliente);
     }
@@ -426,7 +431,7 @@ class Formulario extends Component
             ]);
 
             $totales = app(CalculadorDescuento::class)->calcular(
-                $items->concat($this->productosExistentes()->map(fn ($p) => $p->only(['cantidad', 'precio_unitario']))),
+                $items->concat($this->productosExistentes->map(fn ($p) => $p->only(['cantidad', 'precio_unitario']))),
                 $cliente
             );
 
@@ -473,18 +478,20 @@ class Formulario extends Component
 
     public function render()
     {
-        $tecnicos = Empleado::tecnicosActivos()
-            ->when($this->tecnico_id, fn ($q) => $q->orWhere('id', $this->tecnico_id))
-            ->orderBy('nombres')->get();
+        // Técnicos activos desde la caché; si la OT tiene asignado uno ya inactivo, se agrega.
+        $tecnicos = Catalogos::tecnicos();
+        if ($this->tecnico_id && ! $tecnicos->contains('id', $this->tecnico_id) && ($asignado = Empleado::find($this->tecnico_id))) {
+            $tecnicos = $tecnicos->push($asignado)->sortBy('nombres', SORT_NATURAL | SORT_FLAG_CASE)->values();
+        }
 
         return view('livewire.ordenes.formulario', [
-            'servicios' => Servicio::where('activo', true)->orderBy('nombre')->get(),
+            'servicios' => Catalogos::servicios(),
             'tecnicos' => $tecnicos,
-            'sedes' => Sede::where('activa', true)->orderBy('nombre')->get(),
-            'convenios' => EmpresaColaboradora::where('activo', true)->orderBy('nombre')->get(),
-            'marcas' => Marca::orderBy('nombre')->pluck('nombre'),
-            'productos' => $this->productosExistentes(),
-            'historial' => $this->orden?->historialEstados()->with('empleado')->get() ?? collect(),
+            'sedes' => Catalogos::sedesActivas(),
+            'convenios' => Catalogos::conveniosActivos(),
+            'marcas' => Catalogos::marcas(),
+            'productos' => $this->productosExistentes,
+            'historial' => $this->orden?->historialEstados()->with('empleado:id,nombres,apellidos')->get() ?? collect(),
         ])->title($this->orden ? 'OT '.$this->orden->codigo : 'Nueva orden de trabajo');
     }
 }

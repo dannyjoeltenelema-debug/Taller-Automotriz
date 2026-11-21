@@ -29,7 +29,7 @@
                         <td>{{ $e->especialidad ?? '—' }}</td>
                         <td>{{ $e->sede->nombre }}</td>
                         <td>{{ $e->telefono ?? '—' }}</td>
-                        <td>@if ($e->user){{ $e->user->email }} <span class="muted">({{ $e->user->roles->pluck('name')->join(', ') ?: 'sin rol' }})</span>@else<span class="muted">Sin usuario</span>@endif</td>
+                        <td>@if ($e->user){{ $e->user->cedula }} <span class="muted">({{ $e->user->roles->pluck('name')->join(', ') ?: 'sin rol' }})</span>@else<span class="muted">Sin usuario</span>@endif</td>
                         <td>{!! $e->activo ? '<span class="badge st-listo_entrega">Activo</span>' : '<span class="badge st-entregado">Inactivo</span>' !!}</td>
                         <td class="text-right"><button class="btn btn-sm" wire:click="editar({{ $e->id }})">Editar</button></td>
                     </tr>
@@ -37,6 +37,7 @@
                 </tbody>
             </table>
         </div>
+        @if ($empleados->hasPages())<div class="px-3 py-2 border-t border-[var(--c-border)]">{{ $empleados->links() }}</div>@endif
     </div>
 
     @if ($modal)
@@ -52,7 +53,7 @@
                         <select class="inp" wire:model.live="form.cargo">@foreach (Empleado::CARGOS as $k => $v)<option value="{{ $k }}">{{ $v }}</option>@endforeach</select>
                     </x-campo>
                     <x-campo label="Sede" :req="true" error="form.sede_id">
-                        <select class="inp" wire:model="form.sede_id">@foreach ($sedes as $s)<option value="{{ $s->id }}">{{ $s->nombre }}</option>@endforeach</select>
+                        <select class="inp" wire:model="form.sede_id">@foreach ($sedes as $s)<option value="{{ $s->id }}" wire:key="sede-{{ $s->id }}">{{ $s->nombre }}</option>@endforeach</select>
                     </x-campo>
                     <x-campo label="Especialidad" error="form.especialidad"><input class="inp" wire:model="form.especialidad" placeholder="Ej. Frenos, electricidad…"></x-campo>
                     <label class="flex items-center gap-2 mt-5"><input type="checkbox" wire:model="form.activo"> Empleado activo</label>
@@ -60,12 +61,13 @@
                     @if (in_array($form['cargo'] ?? '', ['admin', 'asesor']))
                         <div class="sm:col-span-2 border-t border-[var(--c-border)] pt-3">
                             @if ($empleadoEditando?->user)
-                                <div class="muted">Usuario vinculado: <strong>{{ $empleadoEditando->user->email }}</strong></div>
+                                <div class="muted">Usuario vinculado: <strong>{{ $empleadoEditando->user->cedula }}</strong></div>
                             @else
                                 <label class="flex items-center gap-2 font-semibold"><input type="checkbox" wire:model.live="crearAcceso"> Crear usuario para acceder al sistema</label>
                                 @if ($crearAcceso)
                                     <div class="grid sm:grid-cols-3 gap-3 mt-2">
-                                        <x-campo label="Correo (login)" :req="true" error="email"><input type="email" class="inp" wire:model="email" autocomplete="off"></x-campo>
+                                        <div class="sm:col-span-3 muted">El usuario para iniciar sesión será la cédula del empleado.</div>
+                                        <x-campo label="Correo (opcional, para recuperar contraseña)" error="email"><input type="email" class="inp" wire:model="email" autocomplete="off"></x-campo>
                                         <x-campo label="Contraseña" :req="true" error="password"><input type="password" class="inp" wire:model="password" autocomplete="new-password"></x-campo>
                                         <x-campo label="Rol" error="rol">
                                             <select class="inp" wire:model="rol">

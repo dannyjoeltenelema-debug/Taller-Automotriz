@@ -72,8 +72,16 @@ class Listado extends Component
 
     public function render()
     {
+        // Solo las columnas que pinta la tabla (evita traer checklist JSON, diagnóstico, observaciones…).
         $q = OrdenTrabajo::query()
-            ->with(['vehiculo.modelo.marca', 'cliente', 'tecnico'])
+            ->select(['id', 'codigo', 'fecha_ingreso', 'vehiculo_id', 'cliente_id', 'tecnico_id', 'total', 'estado', 'estado_cobro', 'forma_cobro'])
+            ->with([
+                'vehiculo:id,placa,modelo_id',
+                'vehiculo.modelo:id,marca_id,nombre',
+                'vehiculo.modelo.marca:id,nombre',
+                'cliente:id,nombres,numero_documento',
+                'tecnico:id,nombres,apellidos',
+            ])
             ->orderByDesc('fecha_ingreso');
 
         match ($this->estado) {
@@ -90,8 +98,11 @@ class Listado extends Component
             ->groupBy('estado')
             ->pluck('n', 'estado');
 
+        // Vista por defecto (activas, sin búsqueda): el total ya lo dio el KPI, se ahorra el COUNT(*) del paginador.
+        $total = $this->estado === 'activas' && trim($this->buscar) === '' ? (int) $conteo->sum() : null;
+
         return view('livewire.ordenes.listado', [
-            'ordenes' => $q->paginate(20),
+            'ordenes' => $q->paginate(20, ['*'], 'page', null, $total),
             'kpi' => [
                 'activas' => (int) $conteo->sum(),
                 'en_proceso' => (int) ($conteo['en_proceso'] ?? 0),

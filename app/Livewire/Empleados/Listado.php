@@ -3,9 +3,9 @@
 namespace App\Livewire\Empleados;
 
 use App\Models\Empleado;
-use App\Models\Sede;
 use App\Models\User;
 use App\Rules\CedulaRucEcuador;
+use App\Support\Catalogos;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
@@ -13,6 +13,7 @@ use Illuminate\Validation\Rules\Password;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 /**
  * Técnicos y mecánicos se registran SIN usuario (no tienen login).
@@ -22,7 +23,14 @@ use Livewire\Component;
 #[Title('Empleados')]
 class Listado extends Component
 {
+    use WithPagination;
+
     public string $filtroCargo = '';
+
+    public function updatedFiltroCargo(): void
+    {
+        $this->resetPage();
+    }
 
     public string $aviso = '';
 
@@ -47,7 +55,7 @@ class Listado extends Component
         $this->editandoId = null;
         $this->form = [
             'nombres' => '', 'apellidos' => '', 'cedula' => '', 'telefono' => '', 'cargo' => 'tecnico',
-            'especialidad' => '', 'sede_id' => auth()->user()->empleado?->sede_id ?? Sede::value('id'), 'activo' => true,
+            'especialidad' => '', 'sede_id' => auth()->user()->empleado?->sede_id ?? Catalogos::sedes()->min('id'), 'activo' => true,
         ];
         $this->reset(['crearAcceso', 'email', 'password']);
         $this->rol = 'admin';
@@ -75,13 +83,15 @@ class Listado extends Component
         $this->validate([
             'form.nombres' => ['required', 'string', 'max:100'],
             'form.apellidos' => ['required', 'string', 'max:100'],
-            'form.cedula' => ['required', 'digits:10', new CedulaRucEcuador('cedula'), Rule::unique('empleados', 'cedula')->ignore($this->editandoId)],
+            'form.cedula' => ['required', 'digits:10', new CedulaRucEcuador('cedula'), Rule::unique('empleados', 'cedula')->ignore($this->editandoId),
+                ...($this->crearAcceso && $puedeAcceso ? [Rule::unique('users', 'cedula')] : [])],
             'form.telefono' => ['nullable', 'regex:/^\+?\d{9,13}$/'],
             'form.cargo' => ['required', Rule::in(array_keys(Empleado::CARGOS))],
             'form.especialidad' => ['nullable', 'string', 'max:100'],
             'form.sede_id' => ['required', 'exists:sedes,id'],
             'form.activo' => ['boolean'],
-            'email' => [Rule::requiredIf($this->crearAcceso && $puedeAcceso), 'nullable', 'email', 'max:120', 'unique:users,email'],
+            // El usuario de login es la cédula del empleado; el correo es opcional (solo para recuperar contraseña).
+            'email' => ['nullable', 'email', 'max:120', 'unique:users,email'],
             'password' => [Rule::requiredIf($this->crearAcceso && $puedeAcceso), 'nullable', Password::min(8)],
             'rol' => [Rule::in($rolesPermitidos)],
         ], [], [
@@ -99,7 +109,8 @@ class Listado extends Component
             if ($this->crearAcceso && $puedeAcceso) {
                 $user = User::create([
                     'name' => $empleado->nombre_completo,
-                    'email' => $this->email,
+                    'cedula' => $empleado->cedula,
+                    'email' => $this->email ?: null,
                     'password' => Hash::make($this->password),
                     'email_verified_at' => now(),
                 ]);
@@ -120,10 +131,10 @@ class Listado extends Component
     public function render()
     {
         return view('livewire.empleados.listado', [
-            'empleados' => Empleado::with(['sede', 'user.roles'])
+            'empleados' => Empleado::with(['sede:id,nombre', 'user:id,cedula', 'user.roles:id,name'])
                 ->when($this->filtroCargo, fn ($q) => $q->where('cargo', $this->filtroCargo))
-                ->orderByDesc('activo')->orderBy('cargo')->orderBy('apellidos')->get(),
-            'sedes' => Sede::orderBy('nombre')->get(),
+                ->orderByDesc('activo')->orderBy('cargo')->orderBy('apellidos')->paginate(50),
+            'sedes' => Catalogos::sedes(),
             'empleadoEditando' => $this->editandoId ? Empleado::with('user')->find($this->editandoId) : null,
         ]);
     }

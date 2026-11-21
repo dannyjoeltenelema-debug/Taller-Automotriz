@@ -18,7 +18,7 @@ class DashboardTest extends TestCase
     public function test_dashboard_redirects_to_work_orders_panel(): void
     {
         $this->seed();
-        $this->actingAs(User::where('email', 'admin@taller.ec')->first());
+        $this->actingAs(User::where('cedula', '1710000009')->first());
 
         $this->get(route('dashboard'))->assertRedirect('/panel/ordenes');
         $this->get('/panel/ordenes')->assertOk();

@@ -11,7 +11,7 @@
 
     <div class="panel">
         <div class="panel-head">
-            <input type="search" class="inp max-w-sm" wire:model.live.debounce.350ms="buscar" placeholder="Buscar por cédula/RUC, nombre o placa">
+            <input type="search" class="inp max-w-sm" wire:model.live.debounce.300ms="buscar" placeholder="Buscar por cédula/RUC, nombre o placa">
             <span class="muted text-[12px] font-normal">{{ $clientes->total() }} registros</span>
         </div>
         <div class="tbl-wrap">
@@ -27,7 +27,7 @@
                         <td>{{ $c->empresaColaboradora ? $c->empresaColaboradora->nombre.' ('.(float) $c->empresaColaboradora->porcentaje_descuento.'%)' : 'No aplica' }}</td>
                         <td>
                             @foreach ($c->vehiculos as $v)
-                                <a href="{{ route('vehiculos.show', $v) }}" wire:navigate class="link placa">{{ $v->placa_formateada }}</a>@if(! $loop->last), @endif
+                                <a wire:key="cli-{{ $c->id }}-veh-{{ $v->id }}" href="{{ route('vehiculos.show', $v) }}" wire:navigate class="link placa">{{ $v->placa_formateada }}</a>@if(! $loop->last), @endif
                             @endforeach
                         </td>
                         <td class="num">{{ $c->ordenes_count }}</td>
@@ -66,7 +66,7 @@
                         <select class="inp" wire:model="empresa_colaboradora_id">
                             <option value="">No aplica</option>
                             @foreach ($convenios as $cv)
-                                <option value="{{ $cv->id }}">{{ $cv->nombre }} ({{ (float) $cv->porcentaje_descuento }}%){{ $cv->activo ? '' : ' — inactivo' }}</option>
+                                <option value="{{ $cv->id }}" wire:key="conv-{{ $cv->id }}">{{ $cv->nombre }} ({{ (float) $cv->porcentaje_descuento }}%){{ $cv->activo ? '' : ' — inactivo' }}</option>
                             @endforeach
                         </select>
                     </x-campo>

@@ -88,7 +88,7 @@
                                 <select class="inp" wire:model.live="vehiculo_id">
                                     <option value="">— Seleccione —</option>
                                     @foreach ($cli->vehiculos as $v)
-                                        <option value="{{ $v->id }}">{{ $v->placa_formateada }} · {{ $v->modelo->marca->nombre }} {{ $v->modelo->nombre }} {{ $v->anio }} · {{ $v->color }}</option>
+                                        <option value="{{ $v->id }}" wire:key="vo-{{ $v->id }}">{{ $v->placa_formateada }} · {{ $v->modelo->marca->nombre }} {{ $v->modelo->nombre }} {{ $v->anio }} · {{ $v->color }}</option>
                                     @endforeach
                                 </select>
                             </x-campo>
@@ -104,7 +104,7 @@
                 <div class="panel-body grid sm:grid-cols-3 gap-3">
                     <x-campo label="Sede" :req="true" error="sede_id">
                         <select class="inp" wire:model="sede_id">
-                            @foreach ($sedes as $s) <option value="{{ $s->id }}">{{ $s->nombre }}</option> @endforeach
+                            @foreach ($sedes as $s) <option value="{{ $s->id }}" wire:key="sede-{{ $s->id }}">{{ $s->nombre }}</option> @endforeach
                         </select>
                     </x-campo>
                     <x-campo label="Fecha y hora de ingreso" :req="true" error="fecha_ingreso">
@@ -124,7 +124,7 @@
                             <input type="number" min="0" class="inp" wire:model.blur="proximo_kilometraje">
                             <button type="button" class="btn btn-sm h-[31px]" title="Recalcular (km + intervalo)" wire:click="recalcularProximo(true)">↺</button>
                         </div>
-                        <div class="muted text-[11.5px]">km + {{ number_format($veh?->intervalo_mantenimiento_km ?? 5000, 0, ',', '.') }} (editable)</div>
+                        <div class="muted text-[11.5px]">km + {{ number_format($veh?->intervalo_mantenimiento_km ?? config('taller.mantenimiento.intervalo_km'), 0, ',', '.') }} (editable)</div>
                     </x-campo>
                     <div class="flex items-end">
                         @if ($veh)
@@ -206,7 +206,7 @@
                             @endforelse
                             {{-- Líneas tipo=producto: las gestiona el módulo Inventario (solo lectura aquí). --}}
                             @foreach ($productos as $p)
-                                <tr class="muted">
+                                <tr class="muted" wire:key="prod-{{ $loop->index }}">
                                     <td>{{ $p->descripcion }}</td><td>Producto</td>
                                     <td class="num">{{ $p->cantidad }}</td><td class="num">{{ $p->precio_unitario }}</td><td class="num">{{ $p->subtotal }}</td><td></td>
                                 </tr>
@@ -227,7 +227,7 @@
                         <select class="inp" wire:model="tecnico_id">
                             <option value="">— Sin asignar —</option>
                             @foreach ($tecnicos as $tec)
-                                <option value="{{ $tec->id }}">{{ $tec->nombre_completo }}{{ $tec->especialidad ? ' · '.$tec->especialidad : '' }}</option>
+                                <option value="{{ $tec->id }}" wire:key="tec-{{ $tec->id }}">{{ $tec->nombre_completo }}{{ $tec->especialidad ? ' · '.$tec->especialidad : '' }}</option>
                             @endforeach
                         </select>
                     </x-campo>
@@ -278,7 +278,7 @@
                     <div class="panel-head">Historial de estados</div>
                     <table class="tbl">
                         @foreach ($historial as $h)
-                            <tr>
+                            <tr wire:key="hist-{{ $h->id }}">
                                 <td class="whitespace-nowrap muted">{{ $h->created_at->format('d/m H:i') }}</td>
                                 <td><x-estado :estado="$h->estado_nuevo" /></td>
                                 <td class="muted text-[12px]">{{ $h->empleado?->nombre_completo ?? 'Sistema' }}</td>
@@ -328,7 +328,7 @@
                                     <select class="inp" wire:model="nuevo.empresa_colaboradora_id">
                                         <option value="">No aplica</option>
                                         @foreach ($convenios as $cv)
-                                            <option value="{{ $cv->id }}">{{ $cv->nombre }} ({{ rtrim(rtrim($cv->porcentaje_descuento, '0'), '.') }}%)</option>
+                                            <option value="{{ $cv->id }}" wire:key="conv-{{ $cv->id }}">{{ $cv->nombre }} ({{ rtrim(rtrim($cv->porcentaje_descuento, '0'), '.') }}%)</option>
                                         @endforeach
                                     </select>
                                 </x-campo>

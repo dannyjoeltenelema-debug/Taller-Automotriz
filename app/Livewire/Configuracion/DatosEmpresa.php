@@ -19,7 +19,7 @@ class DatosEmpresa extends Component
 
     public function mount(): void
     {
-        $e = Empresa::actual() ?? new Empresa(['iva_porcentaje' => 15]);
+        $e = Empresa::actual() ?? new Empresa(['iva_porcentaje' => config('taller.iva_por_defecto')]);
         $this->form = [
             'razon_social' => (string) $e->razon_social,
             'ruc' => (string) $e->ruc,
