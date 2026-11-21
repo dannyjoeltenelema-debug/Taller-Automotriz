@@ -52,10 +52,9 @@ class Vehiculo extends Model
         return Placa::formatear($this->placa);
     }
 
+    /** "Marca Modelo Año". Requiere modelo.marca cargado con eager loading (no consulta dentro de bucles). */
     public function getDescripcionAttribute(): string
     {
-        $this->loadMissing('modelo.marca');
-
         return trim(($this->modelo?->marca?->nombre ?? '').' '.($this->modelo?->nombre ?? '').' '.$this->anio);
     }
 

@@ -2,6 +2,7 @@
 
 namespace App\Observers;
 
+use App\Models\Empresa;
 use App\Models\OrdenTrabajo;
 use App\Models\OtEstado;
 use App\Services\GeneradorCodigoOT;
@@ -15,6 +16,8 @@ class OrdenTrabajoObserver
     public function creating(OrdenTrabajo $orden): void
     {
         $orden->codigo ??= $this->generador->siguiente();
+        // IVA histórico: la OT guarda el % vigente al crearse (no cambia si luego cambia el de empresa).
+        $orden->iva_porcentaje ??= Empresa::ivaPorcentaje();
     }
 
     public function created(OrdenTrabajo $orden): void

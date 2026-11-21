@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Ordenes;
 
+use App\Models\Auditoria;
 use App\Models\Cita;
 use App\Models\OrdenTrabajo;
 use App\Support\Placa;
@@ -24,6 +25,12 @@ class Listado extends Component
     #[Url(except: 'activas')]
     public string $estado = 'activas';
 
+    /** OT que se quiere entregar con cobro pendiente (abre el modal de advertencia). */
+    public ?int $entregaPendienteId = null;
+
+    /** Se incrementa al cancelar/rechazar un cambio: re-crea los selectores para que muestren el estado real. */
+    public int $version = 0;
+
     public function updatedBuscar(): void
     {
         $this->resetPage();
@@ -34,15 +41,55 @@ class Listado extends Component
         $this->resetPage();
     }
 
-    /** Cambio de estado inline (el observer registra la traza en ot_estados). */
+    /**
+     * Cambio de estado inline. Solo transiciones permitidas (config/taller.php → ordenes.transiciones);
+     * el observer registra la traza en ot_estados. Entregar con cobro pendiente pide confirmación.
+     */
     public function cambiarEstado(int $id, string $estado): void
     {
-        abort_unless(array_key_exists($estado, OrdenTrabajo::ESTADOS), 422);
+        $orden = OrdenTrabajo::findOrFail($id, ['id', 'codigo', 'estado', 'estado_cobro', 'total', 'fecha_entrega', 'kilometraje_ingreso', 'vehiculo_id']);
 
-        $orden = OrdenTrabajo::findOrFail($id);
+        if (! array_key_exists($estado, OrdenTrabajo::ESTADOS) || ! $orden->puedePasarA($estado, auth()->user())) {
+            $this->version++;
+            $this->dispatch('toast', tipo: 'error', mensaje: "{$orden->codigo}: no se puede pasar de ".OrdenTrabajo::ESTADOS[$orden->estado].' a '.(OrdenTrabajo::ESTADOS[$estado] ?? $estado).'.');
+
+            return;
+        }
+
+        if ($estado === 'entregado' && $orden->estado_cobro !== 'pagado') {
+            $this->entregaPendienteId = $orden->id;
+
+            return;
+        }
+
+        $this->aplicarEstado($orden, $estado);
+    }
+
+    public function confirmarEntrega(): void
+    {
+        $orden = OrdenTrabajo::findOrFail($this->entregaPendienteId, ['id', 'codigo', 'estado', 'estado_cobro', 'total', 'fecha_entrega', 'kilometraje_ingreso', 'vehiculo_id']);
+        $this->entregaPendienteId = null;
+
+        if ($orden->puedePasarA('entregado', auth()->user())) {
+            $this->aplicarEstado($orden, 'entregado');
+        }
+    }
+
+    public function cancelarEntrega(): void
+    {
+        $this->entregaPendienteId = null;
+        $this->version++;
+    }
+
+    private function aplicarEstado(OrdenTrabajo $orden, string $estado): void
+    {
+        $anterior = $orden->estado;
         $orden->update(['estado' => $estado]);
+        if (OrdenTrabajo::esEstadoFinal($anterior)) {
+            Auditoria::registrar('reabierto', $orden, ['estado' => $anterior], ['estado' => $estado]);
+        }
 
-        $this->dispatch('aviso', mensaje: "{$orden->codigo}: estado cambiado a ".OrdenTrabajo::ESTADOS[$estado].'.');
+        $this->dispatch('toast', mensaje: "{$orden->codigo}: estado cambiado a ".OrdenTrabajo::ESTADOS[$estado].'.');
     }
 
     /**
@@ -59,7 +106,8 @@ class Listado extends Component
             return;
         }
 
-        if (preg_match('/^OT-?\d{4}/i', $t)) {
+        $prefijo = preg_quote((string) config('taller.codigo_ot.prefijo'), '/');
+        if (preg_match('/^'.$prefijo.'-?\d{4}/i', $t)) {
             $q->where('codigo', 'like', strtoupper($t).'%');
         } elseif (ctype_digit($t)) {
             $q->whereHas('cliente', fn (Builder $c) => $c->where('numero_documento', 'like', $t.'%'));
@@ -102,7 +150,10 @@ class Listado extends Component
         $total = $this->estado === 'activas' && trim($this->buscar) === '' ? (int) $conteo->sum() : null;
 
         return view('livewire.ordenes.listado', [
-            'ordenes' => $q->paginate(20, ['*'], 'page', null, $total),
+            'ordenes' => $q->paginate(config('taller.paginacion.ordenes'), ['*'], 'page', null, $total),
+            'porEntregar' => $this->entregaPendienteId
+                ? OrdenTrabajo::find($this->entregaPendienteId, ['id', 'codigo', 'total'])
+                : null,
             'kpi' => [
                 'activas' => (int) $conteo->sum(),
                 'en_proceso' => (int) ($conteo['en_proceso'] ?? 0),

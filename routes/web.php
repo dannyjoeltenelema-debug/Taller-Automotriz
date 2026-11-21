@@ -3,8 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
 
-// Ajustes de cuenta (starter kit, con Flux)
-Route::middleware(['auth'])->group(function () {
+// Ajustes de cuenta (starter kit, con Flux). Solo usuarios con un rol del panel.
+Route::middleware(['auth', 'role:superadmin|admin'])->group(function () {
     Route::redirect('settings', 'settings/profile');
 
     Volt::route('settings/profile', 'settings.profile')->name('settings.profile');

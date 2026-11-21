@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Ordenes;
 
+use App\Models\Auditoria;
 use App\Models\Cita;
 use App\Models\Cliente;
 use App\Models\Empleado;
@@ -61,6 +62,9 @@ class Formulario extends Component
     public string $diagnostico = '';
 
     public ?int $tecnico_id = null;
+
+    /** Solo si el usuario no tiene empleado vinculado (p. ej. un superadmin): quién figura como asesor. */
+    public ?int $asesor_id = null;
 
     // Presupuesto: ítems servicio_fijo | libre
     public array $items = [];
@@ -366,7 +370,32 @@ class Formulario extends Component
             ->map(fn ($i) => ['cantidad' => is_numeric($i['cantidad']) ? $i['cantidad'] : 0, 'precio_unitario' => is_numeric($i['precio_unitario']) ? $i['precio_unitario'] : 0])
             ->concat($this->productosExistentes->map(fn ($p) => $p->only(['cantidad', 'precio_unitario'])));
 
-        return app(CalculadorDescuento::class)->calcular($lineas, $this->cliente);
+        // IVA histórico: una OT existente usa el % guardado; una nueva, el vigente de empresa.
+        return app(CalculadorDescuento::class)->calcular($lineas, $this->cliente, $this->orden?->iva_porcentaje);
+    }
+
+    // ───────────── Asesor y estado ─────────────
+
+    /** El usuario no tiene empleado vinculado y la OT es nueva: debe elegir el asesor. */
+    #[Computed]
+    public function requiereAsesor(): bool
+    {
+        return ! $this->orden?->exists && ! auth()->user()->empleado;
+    }
+
+    #[Computed]
+    public function asesores()
+    {
+        return $this->requiereAsesor
+            ? Empleado::asesoresActivos()->orderBy('apellidos')->get(['id', 'nombres', 'apellidos', 'cargo'])
+            : collect();
+    }
+
+    /** Estados que se pueden elegir: el actual y las transiciones permitidas (config/taller.php). */
+    #[Computed]
+    public function estadosElegibles(): array
+    {
+        return ($this->orden ?? new OrdenTrabajo)->estadosElegibles(auth()->user());
     }
 
     // ───────────── Guardar ─────────────
@@ -386,13 +415,15 @@ class Formulario extends Component
             'checklist' => ['array'],
             'checklist.*.ok' => ['boolean'],
             'checklist.*.nota' => ['nullable', 'string', 'max:150'],
-            'tecnico_id' => ['nullable', Rule::exists('empleados', 'id')->where('cargo', 'tecnico')],
+            'tecnico_id' => ['nullable', Rule::exists('empleados', 'id')->whereIn('cargo', config('taller.ordenes.cargos_tecnico'))],
+            'asesor_id' => [$this->requiereAsesor ? 'required' : 'nullable',
+                Rule::exists('empleados', 'id')->whereIn('cargo', config('taller.ordenes.cargos_asesor'))->where('activo', true)],
             'items' => ['array'],
             'items.*.tipo' => ['required', Rule::in(['servicio_fijo', 'libre'])],
             'items.*.descripcion' => ['required', 'string', 'max:255'],
             'items.*.cantidad' => ['required', 'numeric', 'min:0.01', 'max:9999'],
             'items.*.precio_unitario' => ['required', 'numeric', 'min:0', 'max:999999'],
-            'estado' => ['required', Rule::in(array_keys(OrdenTrabajo::ESTADOS))],
+            'estado' => ['required', Rule::in($this->estadosElegibles)],
             'estado_cobro' => ['required', Rule::in(['pendiente', 'pagado'])],
             'forma_cobro' => ['nullable', 'required_if:estado_cobro,pagado', Rule::in(array_keys(OrdenTrabajo::FORMAS_COBRO))],
         ];
@@ -401,7 +432,7 @@ class Formulario extends Component
     protected function validationAttributes(): array
     {
         return [
-            'cliente_id' => 'cliente', 'vehiculo_id' => 'vehículo', 'kilometraje_ingreso' => 'kilometraje de ingreso',
+            'cliente_id' => 'cliente', 'vehiculo_id' => 'vehículo', 'asesor_id' => 'asesor', 'kilometraje_ingreso' => 'kilometraje de ingreso',
             'proximo_kilometraje' => 'próximo kilometraje', 'items.*.descripcion' => 'descripción del ítem',
             'items.*.cantidad' => 'cantidad', 'items.*.precio_unitario' => 'precio unitario', 'forma_cobro' => 'forma de cobro',
         ];
@@ -409,16 +440,15 @@ class Formulario extends Component
 
     public function guardar()
     {
-        $this->validate();
+        $this->validate(null, [
+            'estado.in' => 'Ese cambio de estado no está permitido desde el estado actual de la orden.',
+        ]);
 
-        $asesorId = $this->orden?->asesor_id ?? auth()->user()->empleado?->id;
-        if (! $asesorId) {
-            $this->addError('cliente_id', 'Su usuario no tiene un empleado vinculado; no puede registrarse como asesor.');
+        // Asesor: el de la OT si ya existe; si no, el empleado del usuario; si no tiene, el elegido en el selector.
+        $asesorId = $this->orden?->asesor_id ?? auth()->user()->empleado?->id ?? $this->asesor_id;
+        $estadoAnterior = $this->orden?->getRawOriginal('estado');
 
-            return null;
-        }
-
-        $orden = DB::transaction(function () use ($asesorId) {
+        $orden = DB::transaction(function () use ($asesorId, $estadoAnterior) {
             $cliente = Cliente::with('empresaColaboradora')->findOrFail($this->cliente_id);
 
             $items = collect($this->items)->map(fn ($i) => [
@@ -432,7 +462,8 @@ class Formulario extends Component
 
             $totales = app(CalculadorDescuento::class)->calcular(
                 $items->concat($this->productosExistentes->map(fn ($p) => $p->only(['cantidad', 'precio_unitario']))),
-                $cliente
+                $cliente,
+                $this->orden?->iva_porcentaje // null en una OT nueva → IVA vigente (el observer lo guarda en la OT)
             );
 
             $datos = [
@@ -456,6 +487,9 @@ class Formulario extends Component
             if ($this->orden?->exists) {
                 $orden = $this->orden;
                 $orden->update($datos);
+                if ($estadoAnterior !== $orden->estado && OrdenTrabajo::esEstadoFinal($estadoAnterior)) {
+                    Auditoria::registrar('reabierto', $orden, ['estado' => $estadoAnterior], ['estado' => $orden->estado]);
+                }
             } else {
                 $orden = OrdenTrabajo::create($datos); // el observer genera el código OT-AAAA-NNNN
             }
@@ -489,6 +523,7 @@ class Formulario extends Component
             'tecnicos' => $tecnicos,
             'sedes' => Catalogos::sedesActivas(),
             'convenios' => Catalogos::convenios(),
+            'estados' => $this->estadosElegibles,
             'marcas' => Catalogos::marcas(),
             'productos' => $this->productosExistentes,
             'historial' => $this->orden?->historialEstados()->with('empleado:id,nombres,apellidos')->get() ?? collect(),

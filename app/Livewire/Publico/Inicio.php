@@ -4,8 +4,11 @@ namespace App\Livewire\Publico;
 
 use App\Models\Cliente;
 use App\Models\Vehiculo;
+use App\Rules\CedulaRucEcuador;
+use App\Rules\PlacaEcuador;
 use App\Support\Placa;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Validator;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -35,12 +38,13 @@ class Inicio extends Component
         }
         RateLimiter::hit($clave, config('taller.portal.consultas_ventana_seg'));
 
-        $valor = trim($this->valor);
-
         if ($this->tipo === 'placa') {
-            $this->validate(['valor' => ['required', 'string', 'max:10']], [], ['valor' => 'placa']);
+            // Se normaliza ANTES de validar (pba-4521, "PBA 4521" → PBA4521) y se valida con la regla ecuatoriana.
+            $placa = Placa::normalizar(mb_substr($this->valor, 0, 20));
+            Validator::make(['valor' => $placa], ['valor' => ['bail', 'required', new PlacaEcuador]], [], ['valor' => 'placa'])->validate();
+
             // Una consulta por índice único (placa) y solo la columna que se usa.
-            $token = Vehiculo::where('placa', Placa::normalizar($valor))->where('activo', true)->value('qr_token');
+            $token = Vehiculo::where('placa', $placa)->where('activo', true)->value('qr_token');
             if (! $token) {
                 $this->addError('valor', 'No encontramos un vehículo registrado con esa placa.');
 
@@ -50,9 +54,11 @@ class Inicio extends Component
             return $this->redirectRoute('publico.vehiculo', $token, navigate: true);
         }
 
-        $this->validate(['valor' => ['required', 'regex:/^\d{10}(\d{3})?$/']], [
+        // Se quitan espacios y guiones antes de validar (módulo 10 / RUC con CedulaRucEcuador).
+        $valor = preg_replace('/[\s\-.]/', '', mb_substr($this->valor, 0, 30));
+        Validator::make(['valor' => $valor], ['valor' => ['bail', 'required', 'regex:/^\d{10}(\d{3})?$/', new CedulaRucEcuador]], [
             'valor.regex' => 'Ingrese una cédula (10 dígitos) o RUC (13 dígitos).',
-        ], ['valor' => 'cédula/RUC']);
+        ], ['valor' => 'cédula/RUC'])->validate();
 
         // Coincidencia EXACTA de documento (no por prefijo) para evitar barridos.
         $vehiculos = Vehiculo::query()

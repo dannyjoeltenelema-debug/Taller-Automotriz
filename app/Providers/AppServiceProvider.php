@@ -11,6 +11,7 @@ use App\Support\Catalogos;
 use Illuminate\Auth\Events\Failed;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
@@ -27,6 +28,9 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // Fuera de producción, un lazy load (N+1) lanza excepción en vez de pasar desapercibido.
+        Model::preventLazyLoading(! $this->app->isProduction());
+
         Vehiculo::observe(VehiculoObserver::class);
         OrdenTrabajo::observe(OrdenTrabajoObserver::class);
 

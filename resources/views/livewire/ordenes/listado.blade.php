@@ -1,4 +1,4 @@
-<div x-data="{ aviso: '' }" x-on:aviso.window="aviso = $event.detail.mensaje; setTimeout(() => aviso = '', 3500)">
+<div>
     <div class="flex flex-wrap items-end justify-between gap-2 mb-3">
         <div>
             <h1 class="page-title">Órdenes de trabajo</h1>
@@ -13,8 +13,6 @@
         <div class="kpi"><div class="kpi-label">Listas para entrega</div><div class="kpi-value">{{ $kpi['listo_entrega'] }}</div></div>
         <a href="{{ route('citas.index') }}" wire:navigate class="kpi block hover:bg-[var(--c-row-hover)]"><div class="kpi-label">Citas pendientes</div><div class="kpi-value">{{ $kpi['citas'] }}</div></a>
     </div>
-
-    <div x-show="aviso" x-cloak x-text="aviso" class="alert alert-ok mb-2"></div>
 
     <div class="panel">
         <div class="panel-head">
@@ -62,12 +60,19 @@
                         <td>{{ $o->tecnico?->nombre_completo ?? '—' }}</td>
                         <td class="num">{{ \App\Support\Dinero::mostrar($o->total) }}</td>
                         <td>
-                            <select class="inp h-[26px] py-0 text-[12px] w-[150px] badge st-{{ $o->estado }}"
-                                    wire:change="cambiarEstado({{ $o->id }}, $event.target.value)">
-                                @foreach (\App\Models\OrdenTrabajo::ESTADOS as $k => $v)
-                                    <option value="{{ $k }}" @selected($o->estado === $k)>{{ $v }}</option>
-                                @endforeach
-                            </select>
+                            @php $opciones = $o->estadosElegibles(auth()->user()); @endphp
+                            @if (count($opciones) > 1)
+                                {{-- Solo el estado actual y las transiciones permitidas (config/taller.php). --}}
+                                <select class="inp h-[26px] py-0 text-[12px] w-[150px] badge st-{{ $o->estado }}"
+                                        wire:key="est-{{ $o->id }}-{{ $o->estado }}-{{ $version }}"
+                                        wire:change="cambiarEstado({{ $o->id }}, $event.target.value)" aria-label="Estado de {{ $o->codigo }}">
+                                    @foreach ($opciones as $k)
+                                        <option value="{{ $k }}" wire:key="est-{{ $o->id }}-{{ $k }}" @selected($o->estado === $k)>{{ \App\Models\OrdenTrabajo::ESTADOS[$k] }}</option>
+                                    @endforeach
+                                </select>
+                            @else
+                                <x-estado :estado="$o->estado" />
+                            @endif
                         </td>
                         <td>
                             <x-estado :estado="$o->estado_cobro" :labels="['pendiente' => 'Pendiente', 'pagado' => 'Pagado']" />
@@ -88,4 +93,20 @@
             <div class="px-3 py-2 border-t border-[var(--c-border)]">{{ $ordenes->links() }}</div>
         @endif
     </div>
+
+    @if ($porEntregar)
+        <div class="modal-back" wire:key="modal-entrega">
+            <div class="modal max-w-[460px]" role="dialog" aria-modal="true">
+                <div class="modal-head"><span>Entregar con cobro pendiente</span><button type="button" wire:click="cancelarEntrega">✕</button></div>
+                <div class="p-4 space-y-2">
+                    <p>La orden <strong>{{ $porEntregar->codigo }}</strong> tiene el cobro pendiente ({{ \App\Support\Dinero::mostrar($porEntregar->total) }}).</p>
+                    <p class="muted text-[12.5px]">Puede entregarla igual; el cobro seguirá pendiente hasta que se registre en la orden.</p>
+                </div>
+                <div class="modal-foot">
+                    <button type="button" class="btn" wire:click="cancelarEntrega">Cancelar</button>
+                    <button type="button" class="btn btn-primary" wire:click="confirmarEntrega" wire:loading.attr="disabled" wire:target="confirmarEntrega">Entregar de todas formas</button>
+                </div>
+            </div>
+        </div>
+    @endif
 </div>

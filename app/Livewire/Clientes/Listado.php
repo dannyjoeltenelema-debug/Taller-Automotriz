@@ -116,7 +116,7 @@ class Listado extends Component
                 ->with(['empresaColaboradora:id,nombre,porcentaje_descuento', 'vehiculos:id,cliente_id,placa'])
                 ->withCount('ordenes')
                 ->orderBy('nombres')
-                ->paginate(20),
+                ->paginate(config('taller.paginacion.clientes')),
             'convenios' => Catalogos::convenios(),
         ]);
     }

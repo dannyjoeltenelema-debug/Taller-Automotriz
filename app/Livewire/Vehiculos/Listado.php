@@ -42,7 +42,7 @@ class Listado extends Component
                 }
             })
             ->orderBy('placa')
-            ->paginate(25);
+            ->paginate(config('taller.paginacion.vehiculos'));
 
         return view('livewire.vehiculos.listado', compact('vehiculos'));
     }

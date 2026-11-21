@@ -231,12 +231,24 @@
                             @endforeach
                         </select>
                     </x-campo>
-                    <x-campo label="Asesor">
-                        <input class="inp" readonly value="{{ $orden?->asesor?->nombre_completo ?? auth()->user()->empleado?->nombre_completo ?? auth()->user()->name }}">
-                    </x-campo>
+                    @if ($this->requiereAsesor)
+                        {{-- Usuario sin empleado vinculado (p. ej. superadmin): elige quién figura como asesor. --}}
+                        <x-campo label="Asesor" :req="true" error="asesor_id">
+                            <select class="inp" wire:model="asesor_id">
+                                <option value="">— Seleccione —</option>
+                                @foreach ($this->asesores as $as)
+                                    <option value="{{ $as->id }}" wire:key="as-{{ $as->id }}">{{ $as->nombre_completo }}</option>
+                                @endforeach
+                            </select>
+                        </x-campo>
+                    @else
+                        <x-campo label="Asesor">
+                            <input class="inp" readonly value="{{ $orden?->asesor?->nombre_completo ?? auth()->user()->empleado?->nombre_completo ?? auth()->user()->name }}">
+                        </x-campo>
+                    @endif
                     <x-campo label="Estado de la orden" error="estado">
                         <select class="inp" wire:model="estado">
-                            @foreach (OrdenTrabajo::ESTADOS as $k => $v) <option value="{{ $k }}">{{ $v }}</option> @endforeach
+                            @foreach ($estados as $k) <option value="{{ $k }}" wire:key="est-{{ $k }}">{{ OrdenTrabajo::ESTADOS[$k] }}</option> @endforeach
                         </select>
                     </x-campo>
                 </div>

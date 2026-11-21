@@ -92,7 +92,7 @@
             <table class="tot">
                 <tr><td>Subtotal</td><td class="r">{{ Dinero::mostrar($orden->subtotal) }}</td></tr>
                 <tr><td>Descuento @if($orden->cliente->empresaColaboradora && $orden->descuento > 0)({{ $pct($orden->cliente->empresaColaboradora->porcentaje_descuento) }}%)@endif</td><td class="r">− {{ Dinero::mostrar($orden->descuento) }}</td></tr>
-                <tr><td>IVA {{ $pct($empresa?->iva_porcentaje ?? config('taller.iva_por_defecto')) }}%</td><td class="r">{{ Dinero::mostrar($orden->iva) }}</td></tr>
+                <tr><td>IVA {{ $pct($orden->iva_porcentaje ?? $empresa?->iva_porcentaje ?? config('taller.iva_por_defecto')) }}%</td><td class="r">{{ Dinero::mostrar($orden->iva) }}</td></tr>
                 <tr class="g"><td>TOTAL</td><td class="r">{{ Dinero::mostrar($orden->total) }}</td></tr>
             </table>
         </td>

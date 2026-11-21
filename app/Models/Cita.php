@@ -31,16 +31,21 @@ class Cita extends Model
     }
 
     /**
-     * Franjas de 1 hora según config/taller.php (por defecto 08:00–09:00 … 13:00–14:00).
+     * Franjas según config/taller.php (apertura, cierre y duración; por defecto 1 h: 08:00–09:00 … 13:00–14:00).
      *
      * @return list<string> horas de inicio, p. ej. ['08:00', '09:00', …]
      */
     public static function franjas(): array
     {
-        return array_map(
-            fn (int $h) => sprintf('%02d:00', $h),
-            range(config('taller.citas.hora_apertura'), config('taller.citas.hora_cierre') - 1)
-        );
+        $paso = max(5, (int) config('taller.citas.duracion_franja_min'));
+        $fin = (int) config('taller.citas.hora_cierre') * 60;
+
+        $franjas = [];
+        for ($m = (int) config('taller.citas.hora_apertura') * 60; $m + $paso <= $fin; $m += $paso) {
+            $franjas[] = sprintf('%02d:%02d', intdiv($m, 60), $m % 60);
+        }
+
+        return $franjas;
     }
 
     /** Citas de un día. Rango semiabierto (no DATE(col)) para que MySQL use el índice de fecha_deseada. */
@@ -54,9 +59,10 @@ class Cita extends Model
 
     public static function etiquetaFranja(string $hora): string
     {
-        $h = (int) substr($hora, 0, 2);
+        $inicio = (int) substr($hora, 0, 2) * 60 + (int) substr($hora, 3, 2);
+        $fin = $inicio + max(5, (int) config('taller.citas.duracion_franja_min'));
 
-        return sprintf('%02d:00–%02d:00', $h, $h + 1);
+        return sprintf('%02d:%02d–%02d:%02d', intdiv($inicio, 60), $inicio % 60, intdiv($fin, 60), $fin % 60);
     }
 
     public function getFranjaAttribute(): string

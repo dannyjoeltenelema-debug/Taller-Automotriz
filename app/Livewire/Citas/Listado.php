@@ -124,7 +124,7 @@ class Listado extends Component
             ->when(! in_array($this->estado, ['abiertas', 'todas']), fn ($q) => $q->where('estado', $this->estado))
             ->when($this->fecha, fn ($q) => $q->delDia($this->fecha))
             ->orderBy('fecha_deseada')->orderBy('hora_inicio')
-            ->paginate(25);
+            ->paginate(config('taller.paginacion.citas'));
 
         return view('livewire.citas.listado', [
             'citas' => $citas,

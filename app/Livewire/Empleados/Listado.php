@@ -133,7 +133,7 @@ class Listado extends Component
         return view('livewire.empleados.listado', [
             'empleados' => Empleado::with(['sede:id,nombre', 'user:id,cedula', 'user.roles:id,name'])
                 ->when($this->filtroCargo, fn ($q) => $q->where('cargo', $this->filtroCargo))
-                ->orderByDesc('activo')->orderBy('cargo')->orderBy('apellidos')->paginate(50),
+                ->orderByDesc('activo')->orderBy('cargo')->orderBy('apellidos')->paginate(config('taller.paginacion.empleados')),
             'sedes' => Catalogos::sedes(),
             'empleadoEditando' => $this->editandoId ? Empleado::with('user')->find($this->editandoId) : null,
         ]);

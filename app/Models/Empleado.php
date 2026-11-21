@@ -46,9 +46,16 @@ class Empleado extends Model
         return $this->hasMany(OrdenTrabajo::class, 'tecnico_id');
     }
 
+    /** Empleados activos que pueden ser técnicos de una OT (cargos en config/taller.php → ordenes.cargos_tecnico). */
     public function scopeTecnicosActivos(Builder $q): Builder
     {
-        return $q->where('cargo', 'tecnico')->where('activo', true);
+        return $q->whereIn('cargo', config('taller.ordenes.cargos_tecnico'))->where('activo', true);
+    }
+
+    /** Empleados activos que pueden registrarse como asesor de una OT (ordenes.cargos_asesor). */
+    public function scopeAsesoresActivos(Builder $q): Builder
+    {
+        return $q->whereIn('cargo', config('taller.ordenes.cargos_asesor'))->where('activo', true);
     }
 
     public function getNombreCompletoAttribute(): string

@@ -34,7 +34,7 @@ class OrdenTrabajo extends Model
         'codigo', 'sede_id', 'vehiculo_id', 'cliente_id', 'asesor_id', 'tecnico_id',
         'fecha_ingreso', 'fecha_entrega', 'kilometraje_ingreso', 'proximo_kilometraje', 'nivel_combustible',
         'observaciones_recepcion', 'checklist', 'diagnostico', 'estado',
-        'subtotal', 'descuento', 'iva', 'total', 'estado_cobro', 'forma_cobro',
+        'subtotal', 'descuento', 'iva', 'iva_porcentaje', 'total', 'estado_cobro', 'forma_cobro',
     ];
 
     protected $casts = [
@@ -44,6 +44,7 @@ class OrdenTrabajo extends Model
         'subtotal' => 'decimal:2',
         'descuento' => 'decimal:2',
         'iva' => 'decimal:2',
+        'iva_porcentaje' => 'decimal:2',
         'total' => 'decimal:2',
     ];
 
@@ -104,6 +105,50 @@ class OrdenTrabajo extends Model
     public function scopeActivas(Builder $q): Builder
     {
         return $q->whereIn('estado', self::ESTADOS_ACTIVOS);
+    }
+
+    // ───────────── Transiciones de estado (config/taller.php → ordenes.transiciones) ─────────────
+
+    /** @return list<string> */
+    public static function transicionesDesde(string $estado): array
+    {
+        return config("taller.ordenes.transiciones.{$estado}", []);
+    }
+
+    /** Estado final (entregado, cancelado): sin transiciones configuradas. */
+    public static function esEstadoFinal(string $estado): bool
+    {
+        return array_key_exists($estado, self::ESTADOS) && self::transicionesDesde($estado) === [];
+    }
+
+    /**
+     * Estados a los que $user puede pasar esta OT (sin incluir el actual). Una OT nueva parte de "recibido".
+     * Desde un estado final solo el superadmin puede reabrirla (al estado ordenes.reabrir_a).
+     *
+     * @return list<string>
+     */
+    public function estadosSiguientes(?User $user): array
+    {
+        $actual = $this->exists ? $this->getRawOriginal('estado') : 'recibido';
+
+        if (self::esEstadoFinal($actual)) {
+            return $user?->hasRole('superadmin') ? [config('taller.ordenes.reabrir_a')] : [];
+        }
+
+        return self::transicionesDesde($actual);
+    }
+
+    /** @return list<string> estado actual + siguientes (opciones de un selector). */
+    public function estadosElegibles(?User $user): array
+    {
+        $actual = $this->exists ? $this->getRawOriginal('estado') : 'recibido';
+
+        return array_values(array_unique([$actual, ...$this->estadosSiguientes($user)]));
+    }
+
+    public function puedePasarA(string $nuevo, ?User $user): bool
+    {
+        return in_array($nuevo, $this->estadosElegibles($user), true);
     }
 
     public function getEstadoLabelAttribute(): string

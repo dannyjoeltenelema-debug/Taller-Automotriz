@@ -5,6 +5,7 @@ namespace Tests\Feature\Settings;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Volt\Volt;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 class ProfileUpdateTest extends TestCase
@@ -13,7 +14,8 @@ class ProfileUpdateTest extends TestCase
 
     public function test_profile_page_is_displayed(): void
     {
-        $this->actingAs($user = User::factory()->create());
+        // settings/* exige un rol del panel (un usuario sin rol recibe 403: ver BugsVerificacionTest).
+        $this->actingAs($user = User::factory()->create()->assignRole(Role::findOrCreate('admin')));
 
         $this->get('/settings/profile')->assertOk();
     }
