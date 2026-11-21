@@ -1,0 +1,60 @@
+/*
+ | Movimiento del panel y del portal: rápido y discreto (software de gestión, no una demo).
+ |  - Duraciones 120–200 ms; nada pasa de 250 ms.
+ |  - ease-out al entrar, ease-in al salir.
+ |  - Solo opacity y transform (nunca width/height/top/left/box-shadow).
+ |  - prefers-reduced-motion: solo cambios de opacidad.
+ | Se definen UNA vez aquí y se reutilizan (clases para x-transition de Alpine y para Blade).
+ */
+:root {
+    --mov-rapido: 120ms;
+    --mov-normal: 160ms;
+    --mov-lento: 200ms;
+    --mov-entrar: cubic-bezier(0, 0, .2, 1);   /* ease-out */
+    --mov-salir: cubic-bezier(.4, 0, 1, 1);    /* ease-in */
+}
+
+@layer components {
+    /* ── Para x-transition: enter/leave + estado inicial/final ── */
+    .anim-enter { transition: opacity var(--mov-normal) var(--mov-entrar), transform var(--mov-normal) var(--mov-entrar); }
+    .anim-leave { transition: opacity var(--mov-rapido) var(--mov-salir), transform var(--mov-rapido) var(--mov-salir); }
+    .anim-oculto { opacity: 0; }
+    .anim-from-up { opacity: 0; transform: translateY(-4px); }      /* dropdowns y toasts: 4 px */
+    .anim-from-scale { opacity: 0; transform: scale(.98); }          /* panel de modal */
+
+    /* ── Entradas al montarse (elementos que Livewire inserta con @if) ── */
+    .anim-aparece { animation: mov-fade var(--mov-normal) var(--mov-entrar) both; }
+    .anim-aparece-escala { animation: mov-escala var(--mov-lento) var(--mov-entrar) both; }
+    .anim-aparece-arriba { animation: mov-arriba var(--mov-normal) var(--mov-entrar) both; }
+
+    /* ── Fila: nueva (resaltado tenue del acento que se apaga en ~1 s) y eliminada (se desvanece) ── */
+    /* Capa del acento DETRÁS del contenido de cada celda; solo se anima su opacidad. */
+    .fila-nueva > td { position: relative; isolation: isolate; }
+    .fila-nueva > td::after { content: ''; position: absolute; inset: 0; z-index: -1; background: var(--c-accent-soft);
+        pointer-events: none; animation: mov-apaga 1s var(--mov-salir) .1s both; }
+    .fila-saliendo { opacity: 0; transition: opacity var(--mov-lento) var(--mov-salir); }
+
+    /* ── Skeleton gris neutro (sin brillo animado) ── */
+    .skel { background: #E5E7EB; border-radius: 2px; height: 12px; }
+    .skel-pulso { animation: mov-pulso 1.2s ease-in-out infinite alternate; }
+
+    /* ── Indicador del ítem activo del sidebar (se desliza con transform) ── */
+    .nav-indicador { position: absolute; left: 0; top: 0; width: 3px; background: var(--c-accent);
+        transition: transform var(--mov-lento) var(--mov-entrar), opacity var(--mov-rapido) linear; will-change: transform; pointer-events: none; }
+
+    /* ── Contenido de la página: fundido corto al navegar ── */
+    .pagina-entra { animation: mov-fade var(--mov-normal) var(--mov-entrar) both; }
+}
+
+@keyframes mov-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes mov-escala { from { opacity: 0; transform: scale(.98); } to { opacity: 1; transform: scale(1); } }
+@keyframes mov-arriba { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes mov-apaga { from { opacity: 1; } to { opacity: 0; } }
+@keyframes mov-pulso { from { opacity: 1; } to { opacity: .55; } }
+
+@media (prefers-reduced-motion: reduce) {
+    .anim-from-up, .anim-from-scale { transform: none; }
+    .anim-aparece-escala, .anim-aparece-arriba { animation-name: mov-fade; }
+    .nav-indicador { transition: opacity var(--mov-rapido) linear; }
+    .skel-pulso { animation: none; }
+}

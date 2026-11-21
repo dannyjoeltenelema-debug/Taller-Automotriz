@@ -257,7 +257,7 @@ class Formulario extends Component
                 'nuevo.telefono' => ['required', 'regex:/^\+?\d{9,13}$/'],
                 'nuevo.email' => ['nullable', 'email', 'max:120'],
                 'nuevo.direccion' => ['nullable', 'string', 'max:255'],
-                'nuevo.empresa_colaboradora_id' => ['nullable', 'exists:empresas_colaboradoras,id'],
+                'nuevo.empresa_colaboradora_id' => ['nullable', Rule::exists('empresas_colaboradoras', 'id')->whereNull('deleted_at')],
             ];
         }
         $this->validate($reglas, [], [
@@ -488,7 +488,7 @@ class Formulario extends Component
             'servicios' => Catalogos::servicios(),
             'tecnicos' => $tecnicos,
             'sedes' => Catalogos::sedesActivas(),
-            'convenios' => Catalogos::conveniosActivos(),
+            'convenios' => Catalogos::convenios(),
             'marcas' => Catalogos::marcas(),
             'productos' => $this->productosExistentes,
             'historial' => $this->orden?->historialEstados()->with('empleado:id,nombres,apellidos')->get() ?? collect(),

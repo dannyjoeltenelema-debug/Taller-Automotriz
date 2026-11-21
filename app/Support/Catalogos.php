@@ -28,7 +28,7 @@ use Illuminate\Support\Facades\DB;
  */
 class Catalogos
 {
-    public const CLAVE = 'taller:catalogos:v1';
+    public const CLAVE = 'taller:catalogos:v2'; // v2: convenios sin "activo" (soft delete)
 
     private ?array $datos = null;
 
@@ -58,15 +58,10 @@ class Catalogos
         return self::sedes()->where('activa', true)->values();
     }
 
-    /** Todas las empresas colaboradoras, por nombre. */
+    /** Empresas colaboradoras vigentes (las eliminadas no se incluyen), por nombre. */
     public static function convenios(): Collection
     {
         return EmpresaColaboradora::hydrate(self::get('convenios'));
-    }
-
-    public static function conveniosActivos(): Collection
-    {
-        return self::convenios()->where('activo', true)->values();
     }
 
     /** Nombres de marcas, ordenados. */
@@ -145,7 +140,7 @@ class Catalogos
             'sedes' => self::filas(Sede::orderBy('nombre')
                 ->select(['id', 'nombre', 'codigo', 'direccion', 'telefono', 'horario', 'activa'])),
             'convenios' => self::filas(EmpresaColaboradora::orderBy('nombre')
-                ->select(['id', 'nombre', 'porcentaje_descuento', 'activo'])),
+                ->select(['id', 'nombre', 'porcentaje_descuento'])),
             'marcas' => $marcas,
             'checklist' => self::filas(ChecklistItem::where('activo', true)->orderBy('orden')->orderBy('id')
                 ->select(['id', 'nombre', 'orden', 'activo'])),

@@ -31,12 +31,10 @@ class Cliente extends Model
         return $this->hasMany(OrdenTrabajo::class);
     }
 
-    /** % de descuento vigente por convenio (0 si "No aplica" o convenio inactivo). */
+    /** % de descuento vigente por convenio (0 si "No aplica"; un convenio eliminado no se carga). */
     public function porcentajeDescuento(): float
     {
-        $convenio = $this->empresaColaboradora;
-
-        return ($convenio && $convenio->activo) ? (float) $convenio->porcentaje_descuento : 0.0;
+        return (float) ($this->empresaColaboradora?->porcentaje_descuento ?? 0);
     }
 
     /**

@@ -85,7 +85,7 @@ class Listado extends Component
             'telefono' => ['required', 'regex:/^\+?\d{9,13}$/'],
             'email' => ['nullable', 'email', 'max:120'],
             'direccion' => ['nullable', 'string', 'max:255'],
-            'empresa_colaboradora_id' => ['nullable', 'exists:empresas_colaboradoras,id'],
+            'empresa_colaboradora_id' => ['nullable', Rule::exists('empresas_colaboradoras', 'id')->whereNull('deleted_at')],
         ];
     }
 

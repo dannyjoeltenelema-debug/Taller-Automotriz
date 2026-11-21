@@ -73,16 +73,11 @@
 
         <main class="flex-1 min-w-0 px-4 py-4">
             <div class="mx-auto max-w-[1200px]">
-                @if (session('ok'))
-                    <div class="alert alert-ok mb-3">{{ session('ok') }}</div>
-                @endif
-                @if (session('error'))
-                    <div class="alert alert-err mb-3">{{ session('error') }}</div>
-                @endif
                 {{ $slot }}
             </div>
         </main>
     </div>
+    @include('partials.toasts')
     <style>[x-cloak]{display:none!important}</style>
 </body>
 </html>

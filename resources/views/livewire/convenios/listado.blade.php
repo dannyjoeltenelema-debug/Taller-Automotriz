@@ -7,25 +7,25 @@
         <button class="btn btn-primary" wire:click="nuevo">+ Nueva empresa</button>
     </div>
 
-    @if ($aviso)<div class="alert alert-ok mb-3">{{ $aviso }}</div>@endif
-
     <div class="panel tbl-wrap">
         <table class="tbl">
-            <thead><tr><th>Empresa</th><th>RUC</th><th class="num">% descuento</th><th>Contacto</th><th>Teléfono</th><th class="num">Clientes</th><th>Estado</th><th></th></tr></thead>
+            <thead><tr><th>Empresa</th><th>RUC</th><th class="num">% descuento</th><th>Contacto</th><th>Teléfono</th><th class="num">Clientes</th><th></th></tr></thead>
             <tbody>
             @forelse ($empresas as $e)
-                <tr wire:key="emp-{{ $e->id }}">
+                <tr wire:key="emp-{{ $e->id }}" data-fila="emp-{{ $e->id }}">
                     <td class="font-medium">{{ $e->nombre }}</td>
                     <td>{{ $e->ruc ?? '—' }}</td>
                     <td class="num">{{ number_format($e->porcentaje_descuento, 2) }} %</td>
                     <td>{{ $e->contacto ?? '—' }}</td>
                     <td>{{ $e->telefono ?? '—' }}</td>
                     <td class="num">{{ $e->clientes_count }}</td>
-                    <td>{!! $e->activo ? '<span class="badge st-listo_entrega">Activo</span>' : '<span class="badge st-entregado">Inactivo</span>' !!}</td>
-                    <td class="text-right"><button class="btn btn-sm" wire:click="editar({{ $e->id }})">Editar</button></td>
+                    <td class="text-right whitespace-nowrap">
+                        <button class="btn btn-sm" wire:click="editar({{ $e->id }})">Editar</button>
+                        <button class="btn btn-sm btn-danger" wire:click="confirmarEliminar({{ $e->id }})">Eliminar</button>
+                    </td>
                 </tr>
             @empty
-                <tr><td colspan="8" class="text-center muted py-6">Sin convenios registrados.</td></tr>
+                <tr><td colspan="7" class="text-center muted py-6">Sin convenios registrados.</td></tr>
             @endforelse
             </tbody>
         </table>
@@ -42,13 +42,33 @@
                     <x-campo label="% de descuento" :req="true" error="porcentaje_descuento"><input type="number" step="0.01" min="0" max="100" class="inp" wire:model="porcentaje_descuento"></x-campo>
                     <x-campo label="Contacto" error="contacto"><input class="inp" wire:model="contacto"></x-campo>
                     <x-campo label="Teléfono" error="telefono"><input class="inp" wire:model="telefono"></x-campo>
-                    <label class="flex items-center gap-2"><input type="checkbox" wire:model="activo"> Convenio activo</label>
                 </div>
                 <div class="modal-foot">
                     <button type="button" class="btn" wire:click="$set('modal', false)">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Guardar</button>
+                    <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="guardar">
+                        <span wire:loading.remove wire:target="guardar">Guardar</span><span wire:loading wire:target="guardar">Guardando…</span>
+                    </button>
                 </div>
             </form>
+        </div>
+    @endif
+
+    @if ($porEliminar)
+        <div class="modal-back" wire:key="modal-eliminar">
+            <div class="modal max-w-[480px]" role="dialog" aria-modal="true">
+                <div class="modal-head"><span>Eliminar empresa colaboradora</span><button type="button" wire:click="$set('eliminandoId', null)">✕</button></div>
+                <div class="p-4 space-y-2">
+                    <p class="font-semibold">{{ $porEliminar->nombre }}</p>
+                    <p>Se eliminará el convenio. {{ $porEliminar->clientes_count }} {{ $porEliminar->clientes_count === 1 ? 'cliente quedará' : 'clientes quedarán' }} en 'No aplica'. Las órdenes ya emitidas no cambian.</p>
+                    <p class="muted text-[12.5px]">El superadmin puede restaurarlo desde Sistema &gt; Registros eliminados (los clientes no se vuelven a vincular solos).</p>
+                </div>
+                <div class="modal-foot">
+                    <button type="button" class="btn" wire:click="$set('eliminandoId', null)">Cancelar</button>
+                    <button type="button" class="btn btn-primary" wire:click="eliminar" wire:loading.attr="disabled" wire:target="eliminar">
+                        <span wire:loading.remove wire:target="eliminar">Eliminar</span><span wire:loading wire:target="eliminar">Eliminando…</span>
+                    </button>
+                </div>
+            </div>
         </div>
     @endif
 </div>

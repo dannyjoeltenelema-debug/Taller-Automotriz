@@ -66,7 +66,7 @@
                         <select class="inp" wire:model="empresa_colaboradora_id">
                             <option value="">No aplica</option>
                             @foreach ($convenios as $cv)
-                                <option value="{{ $cv->id }}" wire:key="conv-{{ $cv->id }}">{{ $cv->nombre }} ({{ (float) $cv->porcentaje_descuento }}%){{ $cv->activo ? '' : ' — inactivo' }}</option>
+                                <option value="{{ $cv->id }}" wire:key="conv-{{ $cv->id }}">{{ $cv->nombre }} ({{ (float) $cv->porcentaje_descuento }}%)</option>
                             @endforeach
                         </select>
                     </x-campo>

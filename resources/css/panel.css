@@ -108,6 +108,13 @@
     .dropdown button { display: block; width: 100%; text-align: left; padding: 6px 10px; border-bottom: 1px solid var(--c-border-soft); }
     .dropdown button:hover { background: var(--c-accent-soft); }
 
+    /* Toasts (arriba a la derecha) */
+    .toasts { position: fixed; top: 56px; right: 12px; z-index: 60; display: flex; flex-direction: column; gap: 6px; width: min(360px, calc(100vw - 24px)); pointer-events: none; }
+    .toast { pointer-events: auto; display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; background: #fff; border: 1px solid var(--c-border); border-left-width: 3px; border-radius: 3px; padding: 8px 10px; font-size: 13px; }
+    .toast-ok { border-left-color: #15803D; }
+    .toast-err { border-left-color: var(--c-danger); }
+    .toast-x { color: var(--c-muted); line-height: 1; }
+
     .placa { font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace; font-weight: 600; letter-spacing: .03em; }
 }
 

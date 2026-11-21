@@ -4,6 +4,7 @@ namespace App\Livewire\Convenios;
 
 use App\Models\EmpresaColaboradora;
 use App\Rules\CedulaRucEcuador;
+use App\Services\GestorConvenios;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -18,8 +19,6 @@ class Listado extends Component
 
     public bool $modal = false;
 
-    public string $aviso = '';
-
     public ?int $editandoId = null;
 
     public string $nombre = '';
@@ -32,12 +31,12 @@ class Listado extends Component
 
     public string $telefono = '';
 
-    public bool $activo = true;
+    /** Convenio a eliminar (abre el modal de confirmación). */
+    public ?int $eliminandoId = null;
 
     public function nuevo(): void
     {
         $this->reset(['editandoId', 'nombre', 'ruc', 'porcentaje_descuento', 'contacto', 'telefono']);
-        $this->activo = true;
         $this->resetValidation();
         $this->modal = true;
     }
@@ -52,7 +51,6 @@ class Listado extends Component
         $this->porcentaje_descuento = (string) (float) $e->porcentaje_descuento;
         $this->contacto = (string) $e->contacto;
         $this->telefono = (string) $e->telefono;
-        $this->activo = $e->activo;
         $this->modal = true;
     }
 
@@ -60,24 +58,50 @@ class Listado extends Component
     {
         $datos = $this->validate([
             'nombre' => ['required', 'string', 'max:150'],
+            // El UNIQUE de BD incluye los eliminados: si el RUC es de uno eliminado, se restaura desde Sistema.
             'ruc' => ['nullable', 'digits:13', new CedulaRucEcuador('ruc'), Rule::unique('empresas_colaboradoras', 'ruc')->ignore($this->editandoId)],
             'porcentaje_descuento' => ['required', 'numeric', 'min:0', 'max:100'],
             'contacto' => ['nullable', 'string', 'max:120'],
             'telefono' => ['nullable', 'regex:/^\+?\d{9,13}$/'],
-            'activo' => ['boolean'],
-        ], [], ['porcentaje_descuento' => '% de descuento', 'telefono' => 'teléfono']);
+        ], [
+            'ruc.unique' => 'Ya existe una empresa colaboradora con ese RUC (puede estar eliminada: el superadmin la restaura en Sistema > Registros eliminados).',
+        ], ['porcentaje_descuento' => '% de descuento', 'telefono' => 'teléfono']);
 
         $datos['ruc'] = $datos['ruc'] ?: null;
-        EmpresaColaboradora::updateOrCreate(['id' => $this->editandoId], $datos);
+        $nueva = ! $this->editandoId;
+        $e = EmpresaColaboradora::updateOrCreate(['id' => $this->editandoId], $datos);
 
         $this->modal = false;
-        $this->aviso = 'Empresa colaboradora guardada.';
+        $this->dispatch('toast', mensaje: 'Empresa colaboradora guardada.');
+        if ($nueva) {
+            $this->dispatch('fila-nueva', id: 'emp-'.$e->id);
+        }
+    }
+
+    // ───────────── Eliminar (soft delete) ─────────────
+
+    public function confirmarEliminar(int $id): void
+    {
+        $this->eliminandoId = $id; // el modal (render) carga nombre y nº de clientes
+    }
+
+    public function eliminar(GestorConvenios $gestor): void
+    {
+        $convenio = EmpresaColaboradora::findOrFail($this->eliminandoId);
+        $n = $gestor->eliminar($convenio);
+        $this->eliminandoId = null;
+
+        $this->dispatch('toast', mensaje: "Convenio «{$convenio->nombre}» eliminado. {$n} ".($n === 1 ? 'cliente quedó' : 'clientes quedaron')." en 'No aplica'.");
     }
 
     public function render()
     {
         return view('livewire.convenios.listado', [
-            'empresas' => EmpresaColaboradora::withCount('clientes')->orderBy('nombre')->paginate(50),
+            'empresas' => EmpresaColaboradora::withCount('clientes')->orderBy('nombre')->paginate(config('taller.paginacion.convenios')),
+            // Modal de eliminar: cuántos clientes quedarán en "No aplica".
+            'porEliminar' => $this->eliminandoId
+                ? EmpresaColaboradora::withCount('clientes')->findOrFail($this->eliminandoId, ['id', 'nombre'])
+                : null,
         ]);
     }
 }
